@@ -3,6 +3,44 @@ import { factories } from "@strapi/strapi";
 export default factories.createCoreController(
   "api::lesson-progress.lesson-progress",
   ({ strapi }) => ({
+    async find(ctx) {
+      const user = ctx.state.user;
+
+      if (!user) {
+        return ctx.unauthorized("Please login first.");
+      }
+
+      const filters = ctx.query?.filters as any;
+
+const lessonDocumentId =
+  filters?.lesson?.documentId?.$eq;
+
+      if (!lessonDocumentId) {
+        return ctx.badRequest("Lesson is required.");
+      }
+
+      const progress = await strapi
+        .documents("api::lesson-progress.lesson-progress")
+        .findMany({
+          filters: {
+            user: {
+              id: {
+                $eq: user.id,
+              },
+            },
+            lesson: {
+              documentId: {
+                $eq: lessonDocumentId,
+              },
+            },
+          },
+        });
+
+      return {
+        data: progress,
+      };
+    },
+
     async create(ctx) {
       const user = ctx.state.user;
 
@@ -50,7 +88,8 @@ export default factories.createCoreController(
 
       const progressData = {
         completed: true,
-        completedAt: data.completedAt || new Date().toISOString(),
+        completedAt:
+          data.completedAt || new Date().toISOString(),
         user: user.id,
         lesson: lesson.documentId,
       };
@@ -75,7 +114,9 @@ export default factories.createCoreController(
           });
       }
 
-      return { data: progress };
+      return {
+        data: progress,
+      };
     },
   })
 );
