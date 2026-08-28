@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Lesson = {
@@ -27,6 +28,8 @@ export default function LessonDetailsPage({
 }: {
   params: Promise<{ documentId: string }>;
 }) {
+   const router = useRouter();
+
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -162,37 +165,28 @@ export default function LessonDetailsPage({
         console.log("Lesson Progress API:", progressResult);
 
         if (progressResponse.ok) {
-          const progressList = Array.isArray(progressResult?.data)
-            ? progressResult.data
-            : [];
+  const progressList = Array.isArray(progressResult?.data)
+    ? progressResult.data
+    : [];
 
-          // Find progress belonging to current logged-in user
-          const currentUserProgress = progressList.find(
-            (item: Progress) => {
-              const relationUserId = item?.user?.id;
+  const currentUserProgress = progressList[0] || null;
 
-              return relationUserId === currentUserId;
-            }
-          );
+  console.log(
+    "Current User Progress:",
+    currentUserProgress
+  );
 
-          if (currentUserProgress) {
-            console.log(
-              "Current User Progress:",
-              currentUserProgress
-            );
+  setProgress(currentUserProgress);
+} else {
+  console.error(
+    "Progress API error:",
+    progressResult
+  );
 
-            setProgress(currentUserProgress);
-          } else {
-            console.log("No progress found for current user.");
-            setProgress(null);
-          }
-        } else {
-          console.error(
-            "Progress API error:",
-            progressResult
-          );
-        }
-      } catch (error) {
+  setProgress(null);
+}
+      } 
+      catch (error) {
         console.error("Lesson error:", error);
 
         setMessage(
@@ -368,16 +362,22 @@ export default function LessonDetailsPage({
 
   return (
     <main style={{ padding: "40px" }}>
-      <Link
-        href="/courses"
-        style={{
-          display: "inline-block",
-          marginBottom: "30px",
-          textDecoration: "none",
-        }}
-      >
-        ← Back to Courses
-      </Link>
+      <button
+  type="button"
+  onClick={() => router.back()}
+  style={{
+    display: "inline-block",
+    marginBottom: "30px",
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    color: "#aaa",
+    fontSize: "16px",
+    cursor: "pointer",
+  }}
+>
+  ← Back
+</button>
 
       <h1>{lesson.title}</h1>
 

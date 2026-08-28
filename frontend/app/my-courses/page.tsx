@@ -3,36 +3,39 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+type Lesson = {
+  id: number;
+  documentId: string;
+  title: string;
+  content: string;
+};
+
 type Course = {
   id: number;
   documentId: string;
   title: string;
   description: string;
+  lessons?: Lesson[];
 };
 
 type Enrollment = {
   id: number;
   documentId: string;
-  course?: Course | { data?: Course | null } | null;
+  course?: Course | null;
 };
 
-type EnrollmentResponse = {
-  data: Enrollment[];
+type MeResponse = {
+  id: number;
+  username: string;
+  email: string;
+  enrollments?: Enrollment[];
 };
 
-function getCourse(
-  course: Enrollment["course"]
-): Course | null {
-  if (!course) {
-    return null;
-  }
-
-  if ("data" in course) {
-    return course.data ?? null;
-  }
-
-  return course;
-}
+type ErrorResponse = {
+  error?: {
+    message?: string;
+  };
+};
 
 export default function MyCoursesPage() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -40,7 +43,7 @@ export default function MyCoursesPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    async function getMyCourses() {
+    async function loadMyCourses() {
       const token = localStorage.getItem("lms_token");
 
       if (!token) {
@@ -51,7 +54,7 @@ export default function MyCoursesPage() {
 
       try {
         const response = await fetch(
-          "http://localhost:1337/api/enrollments?populate=course",
+          "http://localhost:1337/api/users/me?populate[enrollments][populate][course][populate]=lessons",
           {
             method: "GET",
             headers: {
@@ -62,13 +65,10 @@ export default function MyCoursesPage() {
           }
         );
 
-        const result: EnrollmentResponse | {
-          error?: {
-            message?: string;
-          };
-        } = await response.json();
+        const result: MeResponse | ErrorResponse =
+          await response.json();
 
-        console.log("My Courses API:", result);
+        console.log("MY COURSES RESPONSE:", result);
 
         if (!response.ok) {
           setMessage(
@@ -77,164 +77,364 @@ export default function MyCoursesPage() {
                   "Failed to load your courses."
               : "Failed to load your courses."
           );
-
-          setLoading(false);
           return;
         }
 
-        if (!("data" in result)) {
-          setMessage("Invalid response from server.");
-          setLoading(false);
+        if (!("enrollments" in result)) {
+          setEnrollments([]);
           return;
         }
 
-        setEnrollments(result.data || []);
+        const userEnrollments = Array.isArray(
+          result.enrollments
+        )
+          ? result.enrollments
+          : [];
+
+        const validEnrollments =
+          userEnrollments.filter(
+            (enrollment) => enrollment.course
+          );
+
+        const uniqueEnrollments: Enrollment[] = [];
+        const seenCourses = new Set<string>();
+
+        for (const enrollment of validEnrollments) {
+          const course = enrollment.course;
+
+          if (!course) {
+            continue;
+          }
+
+          if (seenCourses.has(course.documentId)) {
+            continue;
+          }
+
+          seenCourses.add(course.documentId);
+          uniqueEnrollments.push(enrollment);
+        }
+
+        setEnrollments(uniqueEnrollments);
       } catch (error) {
-        console.error("My Courses Error:", error);
-        setMessage("Something went wrong.");
+        console.error(
+          "My Courses Error:",
+          error
+        );
+
+        setMessage(
+          "Something went wrong. Please try again."
+        );
       } finally {
         setLoading(false);
       }
     }
 
-    getMyCourses();
+    loadMyCourses();
   }, []);
 
   if (loading) {
     return (
-      <main style={{ padding: "40px" }}>
-        <h1>My Courses</h1>
-
-        <p style={{ marginTop: "20px" }}>
-          Loading your courses...
-        </p>
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "60px 30px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto",
+          }}
+        >
+          <h1>My Courses</h1>
+          <p style={{ color: "#999" }}>
+            Loading your courses...
+          </p>
+        </div>
       </main>
     );
   }
 
   if (message) {
     return (
-      <main style={{ padding: "40px" }}>
-        <h1>My Courses</h1>
-
-        <p style={{ marginTop: "20px" }}>
-          {message}
-        </p>
-
-        <Link
-          href="/login"
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "60px 30px",
+        }}
+      >
+        <div
           style={{
-            display: "inline-block",
-            marginTop: "20px",
-            padding: "10px 18px",
-            border: "1px solid white",
-            borderRadius: "6px",
-            textDecoration: "none",
+            maxWidth: "800px",
+            margin: "0 auto",
           }}
         >
-          Go to Login
-        </Link>
-      </main>
-    );
-  }
+          <h1>My Courses</h1>
 
-  // Only keep enrollments that have a course
-  const validEnrollments = enrollments.filter(
-    (enrollment) => getCourse(enrollment.course)
-  );
-
-  // Remove duplicate courses
-  const uniqueEnrollments: Enrollment[] = [];
-  const seenCourses = new Set<string>();
-
-  for (const enrollment of validEnrollments) {
-    const course = getCourse(enrollment.course);
-
-    if (!course) {
-      continue;
-    }
-
-    const courseKey = course.documentId;
-
-    if (seenCourses.has(courseKey)) {
-      continue;
-    }
-
-    seenCourses.add(courseKey);
-    uniqueEnrollments.push(enrollment);
-  }
-
-  return (
-    <main style={{ padding: "40px" }}>
-      <h1>My Courses</h1>
-
-      {uniqueEnrollments.length === 0 ? (
-        <div style={{ marginTop: "30px" }}>
-          <p>
-            You have not enrolled in any course yet.
+          <p
+            style={{
+              marginTop: "20px",
+              color: "#ccc",
+            }}
+          >
+            {message}
           </p>
 
           <Link
-            href="/courses"
+            href="/login"
             style={{
               display: "inline-block",
               marginTop: "20px",
               padding: "10px 18px",
-              border: "1px solid white",
-              borderRadius: "6px",
+              border: "1px solid #444",
+              borderRadius: "7px",
+              color: "white",
               textDecoration: "none",
             }}
           >
-            Browse Courses
+            Go to Login
           </Link>
         </div>
-      ) : (
-        <div style={{ marginTop: "30px" }}>
-          {uniqueEnrollments.map((enrollment) => {
-            const course = getCourse(enrollment.course);
+      </main>
+    );
+  }
 
-            if (!course) {
-              return null;
-            }
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "60px 30px 100px",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        <Link
+          href="/courses"
+          style={{
+            color: "#aaa",
+            textDecoration: "none",
+          }}
+        >
+          ← Browse Courses
+        </Link>
 
-            return (
-              <div
-                key={course.documentId}
-                style={{
-                  border: "1px solid #333",
-                  borderRadius: "10px",
-                  padding: "20px",
-                  marginBottom: "20px",
-                }}
-              >
-                <h2>{course.title}</h2>
+        <div
+          style={{
+            marginTop: "30px",
+            marginBottom: "40px",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: "#888",
+              fontSize: "14px",
+            }}
+          >
+            Student
+          </p>
 
-                <p
-                  style={{
-                    marginTop: "12px",
-                  }}
-                >
-                  {course.description}
-                </p>
+          <h1
+            style={{
+              margin: "8px 0 0",
+              fontSize: "40px",
+            }}
+          >
+            My Courses
+          </h1>
 
-                <Link
-                  href={`/courses/${course.documentId}`}
-                  style={{
-                    display: "inline-block",
-                    marginTop: "18px",
-                    padding: "10px 18px",
-                    border: "1px solid white",
-                    borderRadius: "6px",
-                    textDecoration: "none",
-                  }}
-                >
-                  Continue Learning →
-                </Link>
-              </div>
-            );
-          })}
+          <p
+            style={{
+              marginTop: "10px",
+              color: "#999",
+            }}
+          >
+            Courses you have enrolled in.
+          </p>
         </div>
-      )}
+
+        {enrollments.length === 0 ? (
+          <div
+            style={{
+              border: "1px dashed #444",
+              borderRadius: "12px",
+              padding: "50px 30px",
+              textAlign: "center",
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "24px",
+              }}
+            >
+              No enrolled courses
+            </h2>
+
+            <p
+              style={{
+                marginTop: "10px",
+                color: "#888",
+              }}
+            >
+              Enroll in a course to start learning.
+            </p>
+
+            <Link
+              href="/courses"
+              style={{
+                display: "inline-block",
+                marginTop: "20px",
+                padding: "11px 18px",
+                borderRadius: "8px",
+                background: "white",
+                color: "black",
+                textDecoration: "none",
+                fontWeight: "600",
+              }}
+            >
+              Browse Courses →
+            </Link>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(320px, 1fr))",
+              gap: "22px",
+            }}
+          >
+            {enrollments.map((enrollment) => {
+              const course = enrollment.course;
+
+              if (!course) {
+                return null;
+              }
+
+              const lessons = course.lessons || [];
+
+              return (
+                <article
+                  key={course.documentId}
+                  style={{
+                    border: "1px solid #333",
+                    borderRadius: "14px",
+                    padding: "24px",
+                    background: "#111",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "#777",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Enrolled Course
+                  </p>
+
+                  <h2
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "10px",
+                      fontSize: "24px",
+                    }}
+                  >
+                    {course.title}
+                  </h2>
+
+                  <p
+                    style={{
+                      color: "#aaa",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    {course.description}
+                  </p>
+
+                  <div
+                    style={{
+                      marginTop: "22px",
+                      paddingTop: "18px",
+                      borderTop: "1px solid #292929",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: "18px",
+                      }}
+                    >
+                      Lessons ({lessons.length})
+                    </h3>
+
+                    {lessons.length === 0 ? (
+                      <p
+                        style={{
+                          color: "#777",
+                          marginTop: "12px",
+                        }}
+                      >
+                        No lessons available yet.
+                      </p>
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                        }}
+                      >
+                        {lessons.map(
+                          (lesson, index) => (
+                            <Link
+                              key={
+                                lesson.documentId
+                              }
+                              href={`/lessons/${lesson.documentId}`}
+                              style={{
+                                display: "block",
+                                padding: "11px 0",
+                                borderBottom:
+                                  "1px solid #222",
+                                color: "white",
+                                textDecoration:
+                                  "none",
+                              }}
+                            >
+                              Lesson {index + 1}:{" "}
+                              {lesson.title}
+                            </Link>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <Link
+                    href={`/courses/${course.documentId}`}
+                    style={{
+                      display: "inline-block",
+                      marginTop: "22px",
+                      padding: "11px 18px",
+                      borderRadius: "8px",
+                      background: "white",
+                      color: "black",
+                      textDecoration: "none",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Continue Learning →
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </main>
   );
 }

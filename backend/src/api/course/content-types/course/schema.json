@@ -39,9 +39,10 @@
       "mappedBy": "course"
     },
     "lessons": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::lesson.lesson"
-    }
+  "type": "relation",
+  "relation": "oneToMany",
+  "target": "api::lesson.lesson",
+  "mappedBy": "course"
+}
   }
 }

@@ -24,8 +24,9 @@
     },
     "course": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::course.course"
+      "relation": "manyToOne",
+      "target": "api::course.course",
+      "inversedBy": "lessons"
     },
     "progresses": {
       "type": "relation",

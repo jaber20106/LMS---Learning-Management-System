@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 type Enrollment = {
   id: number;
@@ -16,8 +15,6 @@ type Enrollment = {
 };
 
 export default function HomePage() {
-  const router = useRouter();
-
   const [loggedIn, setLoggedIn] = useState(false);
   const [hasCourses, setHasCourses] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,6 +39,7 @@ export default function HomePage() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
+            cache: "no-store",
           }
         );
 
@@ -54,11 +52,15 @@ export default function HomePage() {
 
         const result = await response.json();
 
-        const enrollments: Enrollment[] = result.data || [];
+        const enrollments: Enrollment[] =
+          result.data || [];
 
         setHasCourses(enrollments.length > 0);
       } catch (error) {
-        console.error("Failed to check enrollment:", error);
+        console.error(
+          "Failed to check enrollment:",
+          error
+        );
       } finally {
         setLoading(false);
       }
@@ -67,15 +69,6 @@ export default function HomePage() {
     checkUser();
   }, []);
 
-  function handleLogout() {
-    localStorage.removeItem("lms_token");
-
-    setLoggedIn(false);
-    setHasCourses(false);
-
-    router.push("/");
-  }
-
   return (
     <main
       style={{
@@ -83,99 +76,6 @@ export default function HomePage() {
         padding: "30px 40px",
       }}
     >
-      {/* Navbar */}
-      <nav
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          maxWidth: "1100px",
-          margin: "0 auto",
-        }}
-      >
-        <Link
-          href="/"
-          style={{
-            fontSize: "24px",
-            fontWeight: "700",
-            textDecoration: "none",
-            color: "inherit",
-          }}
-        >
-          LMS
-        </Link>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "20px",
-            alignItems: "center",
-          }}
-        >
-          <Link
-            href="/courses"
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-            }}
-          >
-            Courses
-          </Link>
-
-          {!loading && !loggedIn && (
-            <>
-              <Link
-                href="/login"
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
-              >
-                Login
-              </Link>
-
-              <Link
-                href="/register"
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
-              >
-                Register
-              </Link>
-            </>
-          )}
-
-          {!loading && loggedIn && (
-            <>
-              <Link
-                href="/my-courses"
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
-              >
-                My Courses
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: "6px",
-                  border: "1px solid #444",
-                  background: "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                }}
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-      </nav>
-
       {/* Hero */}
       <section
         style={{
