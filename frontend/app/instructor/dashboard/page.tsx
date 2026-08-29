@@ -360,6 +360,23 @@ export default function InstructorDashboard() {
 >
   Quizzes
 </Link>
+<Link
+  href="/instructor/dashboard/quizzes/manage"
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "12px 18px",
+    borderRadius: "8px",
+    border: "1px solid #444",
+    color: "white",
+    textDecoration: "none",
+    fontWeight: "600",
+    whiteSpace: "nowrap",
+  }}
+>
+  Manage Quizzes
+</Link>
         </div>
 
         {/* Message */}
