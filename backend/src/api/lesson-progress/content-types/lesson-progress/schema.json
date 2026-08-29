@@ -7,7 +7,7 @@
     "displayName": "Lesson Progress"
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {

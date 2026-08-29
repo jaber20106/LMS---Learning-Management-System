@@ -222,24 +222,25 @@ export default function ManageLessonsPage({
       // =========================
 
       const response = await fetch(
-        "http://localhost:1337/api/lessons",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-  data: {
-    title: title.trim(),
-    content: content.trim(),
-    course: {
-      connect: [courseDocumentId],
+  "http://localhost:1337/api/lessons",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  },
-}),
-        }
-      );
+    body: JSON.stringify({
+      data: {
+        title: title.trim(),
+        content: content.trim(),
+        course: {
+          connect: [courseDocumentId],
+        },
+      },
+      status: "published",
+    }),
+  }
+);
 
       const result = await response.json();
 

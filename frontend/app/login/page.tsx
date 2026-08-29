@@ -71,16 +71,22 @@ export default function LoginPage() {
           const roleName = user?.role?.name?.trim().toLowerCase();
 
           if (
-            roleName === "student" ||
-            roleName === "instructor"
-          ) {
-            role = roleName;
-            localStorage.setItem("lms_role", role);
-            localStorage.setItem(
-              "lms_user",
-              JSON.stringify(user)
-            );
-          }
+  roleName === "student" ||
+  roleName === "instructor" ||
+  roleName === "admin"
+) {
+  role = roleName;
+
+  localStorage.setItem(
+    "lms_role",
+    role
+  );
+
+  localStorage.setItem(
+    "lms_user",
+    JSON.stringify(user)
+  );
+}
         }
       } catch (error) {
         console.error("User role lookup error:", error);
@@ -97,9 +103,13 @@ export default function LoginPage() {
 
       setMessage(`Welcome, ${data.user.username}!`);
 
-      router.replace(
-        role === "instructor" ? "/instructor/dashboard" : "/"
-      );
+      if (role === "admin") {
+  router.replace("/admin/dashboard");
+} else if (role === "instructor") {
+  router.replace("/instructor/dashboard");
+} else {
+  router.replace("/");
+}
     } catch (error) {
       console.error("Login error:", error);
 

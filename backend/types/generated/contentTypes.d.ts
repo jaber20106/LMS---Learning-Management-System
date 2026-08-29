@@ -523,7 +523,7 @@ export interface ApiLessonProgressLessonProgress
     singularName: 'lesson-progress';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     completed: Schema.Attribute.Boolean;

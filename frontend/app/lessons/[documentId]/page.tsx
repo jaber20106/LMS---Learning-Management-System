@@ -11,16 +11,17 @@ type Lesson = {
   content: string;
 };
 
-type ProgressUser = {
-  id: number;
-};
-
 type Progress = {
   id: number;
   documentId: string;
   completed: boolean;
   completedAt?: string | null;
-  user?: ProgressUser;
+  lesson?: {
+    documentId?: string;
+  } | null;
+  user?: {
+    id?: number;
+  } | null;
 };
 
 export default function LessonDetailsPage({
@@ -28,190 +29,248 @@ export default function LessonDetailsPage({
 }: {
   params: Promise<{ documentId: string }>;
 }) {
-   const router = useRouter();
+  const router = useRouter();
 
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [progress, setProgress] = useState<Progress | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [completing, setCompleting] = useState(false);
-  const [message, setMessage] = useState("");
+  const [lesson, setLesson] =
+    useState<Lesson | null>(null);
 
-  // =========================
-  // LOAD LESSON + PROGRESS
-  // =========================
+  const [progress, setProgress] =
+    useState<Progress | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [completing, setCompleting] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  // ==========================================
+  // LOAD LESSON + CURRENT USER PROGRESS
+  // ==========================================
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadLesson() {
       try {
         const { documentId } = await params;
 
-        console.log("Lesson documentId:", documentId);
-
-        const token = localStorage.getItem("lms_token");
+        const token =
+          localStorage.getItem("lms_token");
 
         if (!token) {
-          setMessage("Please login first.");
-          setLoading(false);
+          if (!cancelled) {
+            setMessage("Please login first.");
+            setLoading(false);
+          }
+
           return;
         }
 
-        // =========================
-        // 1. GET LESSON
-        // =========================
-
-        const lessonResponse = await fetch(
-          `http://localhost:1337/api/lessons?filters[documentId][$eq]=${encodeURIComponent(
-            documentId
-          )}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            cache: "no-store",
-          }
+        console.log(
+          "LESSON DOCUMENT ID:",
+          documentId
         );
 
-        const lessonResult = await lessonResponse.json();
+        // ======================================
+        // 1. GET LESSON
+        // ======================================
 
-        console.log("Lesson API:", lessonResult);
+        const lessonResponse =
+          await fetch(
+            `http://localhost:1337/api/lessons/${encodeURIComponent(
+              documentId
+            )}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type":
+                  "application/json",
+              },
+              cache: "no-store",
+            }
+          );
+
+        const lessonResult =
+          await lessonResponse.json();
+
+        console.log(
+          "LESSON API:",
+          lessonResult
+        );
 
         if (!lessonResponse.ok) {
-          setMessage(
-            lessonResult?.error?.message ||
-              `Failed to fetch lesson. Status: ${lessonResponse.status}`
-          );
-          setLoading(false);
+          if (!cancelled) {
+            setMessage(
+              lessonResult?.error?.message ||
+                `Failed to fetch lesson. Status: ${lessonResponse.status}`
+            );
+            setLoading(false);
+          }
+
           return;
         }
 
-        if (
-          !lessonResult?.data ||
-          !Array.isArray(lessonResult.data) ||
-          lessonResult.data.length === 0
-        ) {
-          setMessage("Lesson not found.");
-          setLoading(false);
+        if (!lessonResult?.data) {
+          if (!cancelled) {
+            setMessage(
+              "Lesson not found."
+            );
+            setLoading(false);
+          }
+
           return;
         }
 
-        const currentLesson: Lesson = lessonResult.data[0];
+        const currentLesson: Lesson =
+          lessonResult.data;
+
+        if (cancelled) {
+          return;
+        }
 
         setLesson(currentLesson);
 
-        // =========================
+        // ======================================
         // 2. GET CURRENT USER
-        // =========================
+        // ======================================
 
-        const userResponse = await fetch(
-          "http://localhost:1337/api/users/me",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            cache: "no-store",
-          }
+        const userResponse =
+          await fetch(
+            "http://localhost:1337/api/users/me",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type":
+                  "application/json",
+              },
+              cache: "no-store",
+            }
+          );
+
+        const userResult =
+          await userResponse.json();
+
+        console.log(
+          "CURRENT USER:",
+          userResult
         );
 
-        const userResult = await userResponse.json();
-
-        console.log("Current User:", userResult);
-
         if (!userResponse.ok) {
-          setMessage(
-            userResult?.error?.message ||
-              "Failed to get current user."
-          );
-          setLoading(false);
+          if (!cancelled) {
+            setMessage(
+              userResult?.error?.message ||
+                "Failed to get current user."
+            );
+          }
+
           return;
         }
 
-        const currentUserId = userResult.id;
+        const currentUserId =
+          userResult?.id;
 
-        // =========================
-        // 3. GET LESSON PROGRESS
-        // =========================
-        //
-        // IMPORTANT:
-        // We are NOT using:
-        // filters[user][id]
-        //
-        // because that was causing the
-        // Invalid key user / 400 error.
-        //
-        // Instead, get progress for this lesson
-        // and populate the user relation.
-        //
-
-        const progressResponse = await fetch(
-          `http://localhost:1337/api/lesson-progresses?filters[lesson][documentId][$eq]=${encodeURIComponent(
-            currentLesson.documentId
-          )}&populate=user`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            cache: "no-store",
+        if (!currentUserId) {
+          if (!cancelled) {
+            setMessage(
+              "Current user could not be identified."
+            );
           }
+
+          return;
+        }
+
+        // ======================================
+        // 3. GET CURRENT USER'S PROGRESS
+        // FOR CURRENT LESSON ONLY
+        // ======================================
+
+        const progressResponse =
+          await fetch(
+            `http://localhost:1337/api/lesson-progresses?filters[lesson][documentId][$eq]=${encodeURIComponent(
+              documentId
+            )}&filters[user][id][$eq]=${currentUserId}&populate=lesson&populate=user`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type":
+                  "application/json",
+              },
+              cache: "no-store",
+            }
+          );
+
+        const progressResult =
+          await progressResponse.json();
+
+        console.log(
+          "CURRENT LESSON PROGRESS:",
+          progressResult
         );
 
-        const progressResult = await progressResponse.json();
+        if (
+          progressResponse.ok &&
+          Array.isArray(
+            progressResult?.data
+          )
+        ) {
+          const currentProgress =
+            progressResult.data[0] ||
+            null;
 
-        console.log("Lesson Progress API:", progressResult);
-
-        if (progressResponse.ok) {
-  const progressList = Array.isArray(progressResult?.data)
-    ? progressResult.data
-    : [];
-
-  const currentUserProgress = progressList[0] || null;
-
-  console.log(
-    "Current User Progress:",
-    currentUserProgress
-  );
-
-  setProgress(currentUserProgress);
-} else {
-  console.error(
-    "Progress API error:",
-    progressResult
-  );
-
-  setProgress(null);
-}
-      } 
-      catch (error) {
-        console.error("Lesson error:", error);
-
-        setMessage(
-          error instanceof Error
-            ? error.message
-            : "Something went wrong."
+          if (!cancelled) {
+            setProgress(
+              currentProgress
+            );
+          }
+        } else {
+          if (!cancelled) {
+            setProgress(null);
+          }
+        }
+      } catch (error) {
+        console.error(
+          "LESSON LOAD ERROR:",
+          error
         );
+
+        if (!cancelled) {
+          setMessage(
+            error instanceof Error
+              ? error.message
+              : "Something went wrong."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadLesson();
+
+    return () => {
+      cancelled = true;
+    };
   }, [params]);
 
-  // =========================
+  // ==========================================
   // MARK LESSON COMPLETE
-  // =========================
+  // ==========================================
 
   async function markComplete() {
     try {
       setCompleting(true);
       setMessage("");
 
-      const token = localStorage.getItem("lms_token");
+      const token =
+        localStorage.getItem("lms_token");
 
       if (!token) {
         setMessage("Please login first.");
@@ -223,33 +282,84 @@ export default function LessonDetailsPage({
         return;
       }
 
-      const completedAt = new Date().toISOString();
+      // ======================================
+      // GET CURRENT USER
+      // ======================================
 
-      // =========================
-      // UPDATE EXISTING PROGRESS
-      // =========================
-
-      if (progress) {
-        const response = await fetch(
-          `http://localhost:1337/api/lesson-progresses/${progress.documentId}`,
+      const userResponse =
+        await fetch(
+          "http://localhost:1337/api/users/me",
           {
-            method: "PUT",
+            method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+              "Content-Type":
+                "application/json",
             },
-            body: JSON.stringify({
-              data: {
-                completed: true,
-                completedAt,
-              },
-            }),
+            cache: "no-store",
           }
         );
 
-        const result = await response.json();
+      const userResult =
+        await userResponse.json();
 
-        console.log("Update Progress:", result);
+      if (!userResponse.ok) {
+        throw new Error(
+          userResult?.error?.message ||
+            "Failed to get current user."
+        );
+      }
+
+      const currentUserId =
+        userResult?.id;
+
+      if (!currentUserId) {
+        throw new Error(
+          "Current user could not be identified."
+        );
+      }
+
+      const completedAt =
+        new Date().toISOString();
+
+      // ======================================
+      // UPDATE EXISTING PROGRESS
+      // ======================================
+
+      if (progress) {
+        console.log(
+          "UPDATING PROGRESS:",
+          progress.documentId
+        );
+
+        const response =
+          await fetch(
+            `http://localhost:1337/api/lesson-progresses/${encodeURIComponent(
+              progress.documentId
+            )}`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                data: {
+                  completed: true,
+                  completedAt,
+                },
+              }),
+            }
+          );
+
+        const result =
+          await response.json();
+
+        console.log(
+          "UPDATE PROGRESS RESULT:",
+          result
+        );
 
         if (!response.ok) {
           throw new Error(
@@ -259,46 +369,71 @@ export default function LessonDetailsPage({
         }
 
         setProgress(result.data);
+
+        setMessage(
+          "Lesson marked as complete! ✓"
+        );
+
+        return;
       }
 
-      // =========================
+      // ======================================
       // CREATE NEW PROGRESS
-      // =========================
+      // ======================================
 
-      else {
-        const response = await fetch(
+      console.log(
+        "CREATING PROGRESS"
+      );
+
+      const response =
+        await fetch(
           "http://localhost:1337/api/lesson-progresses",
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+              "Content-Type":
+                "application/json",
             },
             body: JSON.stringify({
               data: {
                 completed: true,
                 completedAt,
-                lesson: lesson.documentId,
+
+                user: currentUserId,
+
+                lesson:
+                  lesson.documentId,
               },
             }),
           }
         );
 
-        const result = await response.json();
+      const result =
+        await response.json();
 
-        console.log("Create Progress:", result);
+      console.log(
+        "CREATE PROGRESS RESULT:",
+        result
+      );
 
-        if (!response.ok) {
-          throw new Error(
-            result?.error?.message ||
-              "Failed to create lesson progress."
-          );
-        }
-
-        setProgress(result.data);
+      if (!response.ok) {
+        throw new Error(
+          result?.error?.message ||
+            "Failed to create lesson progress."
+        );
       }
+
+      setProgress(result.data);
+
+      setMessage(
+        "Lesson marked as complete! ✓"
+      );
     } catch (error) {
-      console.error("Complete lesson error:", error);
+      console.error(
+        "MARK COMPLETE ERROR:",
+        error
+      );
 
       setMessage(
         error instanceof Error
@@ -310,128 +445,236 @@ export default function LessonDetailsPage({
     }
   }
 
-  // =========================
+  // ==========================================
   // LOADING
-  // =========================
+  // ==========================================
 
   if (loading) {
     return (
-      <main style={{ padding: "40px" }}>
-        <h1>Lesson</h1>
-
-        <p style={{ marginTop: "20px" }}>
-          Loading lesson...
-        </p>
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "60px 30px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "900px",
+            margin: "0 auto",
+          }}
+        >
+          <p style={{ color: "#999" }}>
+            Loading lesson...
+          </p>
+        </div>
       </main>
     );
   }
 
-  // =========================
-  // ERROR
-  // =========================
+  // ==========================================
+  // ERROR / LESSON NOT FOUND
+  // ==========================================
 
   if (!lesson) {
     return (
-      <main style={{ padding: "40px" }}>
-        <h1>Lesson Access</h1>
-
-        <p style={{ marginTop: "20px" }}>
-          {message || "Lesson not found."}
-        </p>
-
-        <Link
-          href="/courses"
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "60px 30px",
+        }}
+      >
+        <div
           style={{
-            display: "inline-block",
-            marginTop: "20px",
-            padding: "10px 18px",
-            border: "1px solid white",
-            borderRadius: "6px",
-            textDecoration: "none",
+            maxWidth: "900px",
+            margin: "0 auto",
           }}
         >
-          Browse Courses
-        </Link>
+          <h1>Lesson Access</h1>
+
+          <p
+            style={{
+              marginTop: "20px",
+              color: "#aaa",
+            }}
+          >
+            {message ||
+              "Lesson not found."}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => router.back()}
+            style={{
+              marginTop: "20px",
+              padding: "10px 18px",
+              border: "1px solid #444",
+              borderRadius: "7px",
+              background: "transparent",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            ← Back
+          </button>
+        </div>
       </main>
     );
   }
 
-  // =========================
+  // ==========================================
   // LESSON PAGE
-  // =========================
+  // ==========================================
 
   return (
-    <main style={{ padding: "40px" }}>
-      <button
-  type="button"
-  onClick={() => router.back()}
-  style={{
-    display: "inline-block",
-    marginBottom: "30px",
-    padding: 0,
-    border: "none",
-    background: "transparent",
-    color: "#aaa",
-    fontSize: "16px",
-    cursor: "pointer",
-  }}
->
-  ← Back
-</button>
-
-      <h1>{lesson.title}</h1>
-
-      <p
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "60px 30px",
+      }}
+    >
+      <div
         style={{
-          marginTop: "20px",
-          lineHeight: "1.8",
           maxWidth: "900px",
+          margin: "0 auto",
         }}
       >
-        {lesson.content}
-      </p>
+        {/* BACK */}
 
-      <div style={{ marginTop: "40px" }}>
-        {progress?.completed ? (
-          <div>
-            <h3>✓ Lesson Completed</h3>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          style={{
+            display: "inline-block",
+            marginBottom: "30px",
+            padding: 0,
+            border: "none",
+            background: "transparent",
+            color: "#aaa",
+            fontSize: "16px",
+            cursor: "pointer",
+          }}
+        >
+          ← Back
+        </button>
 
-            {progress.completedAt && (
-              <p style={{ marginTop: "10px" }}>
-                Completed at:{" "}
-                {new Date(
-                  progress.completedAt
-                ).toLocaleString()}
+        {/* LESSON */}
+
+        <div
+          style={{
+            border: "1px solid #333",
+            borderRadius: "12px",
+            padding: "30px",
+          }}
+        >
+          <p
+            style={{
+              color: "#777",
+              fontSize: "14px",
+              margin: 0,
+            }}
+          >
+            Lesson
+          </p>
+
+          <h1
+            style={{
+              marginTop: "10px",
+            }}
+          >
+            {lesson.title}
+          </h1>
+
+          <div
+            style={{
+              marginTop: "30px",
+              lineHeight: "1.8",
+              whiteSpace: "pre-wrap",
+              color: "#ccc",
+            }}
+          >
+            {lesson.content}
+          </div>
+
+          {/* COMPLETE */}
+
+          <div
+            style={{
+              marginTop: "40px",
+              paddingTop: "25px",
+              borderTop: "1px solid #333",
+            }}
+          >
+            {progress?.completed ? (
+              <div>
+                <p
+                  style={{
+                    color: "#22c55e",
+                    fontWeight: "600",
+                    fontSize: "18px",
+                  }}
+                >
+                  ✓ Lesson Completed
+                </p>
+
+                {progress.completedAt && (
+                  <p
+                    style={{
+                      marginTop: "10px",
+                      color: "#777",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Completed at:{" "}
+                    {new Date(
+                      progress.completedAt
+                    ).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={markComplete}
+                disabled={completing}
+                style={{
+                  padding: "12px 20px",
+                  border: "1px solid white",
+                  borderRadius: "7px",
+                  background: completing
+                    ? "#333"
+                    : "white",
+                  color: completing
+                    ? "#999"
+                    : "black",
+                  cursor: completing
+                    ? "not-allowed"
+                    : "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                {completing
+                  ? "Saving..."
+                  : "Mark as Complete ✓"}
+              </button>
+            )}
+
+            {message && (
+              <p
+                style={{
+                  marginTop: "15px",
+                  color: message.includes(
+                    "complete"
+                  )
+                    ? "#22c55e"
+                    : "#aaa",
+                }}
+              >
+                {message}
               </p>
             )}
           </div>
-        ) : (
-          <button
-            onClick={markComplete}
-            disabled={completing}
-            style={{
-              padding: "12px 20px",
-              border: "1px solid white",
-              borderRadius: "6px",
-              background: "transparent",
-              color: "white",
-              cursor: completing
-                ? "not-allowed"
-                : "pointer",
-            }}
-          >
-            {completing
-              ? "Saving..."
-              : "Mark as Complete ✓"}
-          </button>
-        )}
+        </div>
       </div>
-
-      {message && (
-        <p style={{ marginTop: "20px" }}>
-          {message}
-        </p>
-      )}
     </main>
   );
 }

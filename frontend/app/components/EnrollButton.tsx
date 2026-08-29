@@ -5,18 +5,20 @@ import Link from "next/link";
 
 type Props = {
   courseDocumentId: string;
+  onEnrollmentSuccess?: () => void;
 };
 
 type Enrollment = {
   id: number;
   documentId: string;
   course?: {
-    documentId: string;
+    documentId?: string;
   } | null;
 };
 
 export default function EnrollButton({
   courseDocumentId,
+  onEnrollmentSuccess,
 }: Props) {
   const [loading, setLoading] = useState(true);
   const [enrolled, setEnrolled] = useState(false);
@@ -24,7 +26,8 @@ export default function EnrollButton({
 
   useEffect(() => {
     async function checkEnrollment() {
-      const token = localStorage.getItem("lms_token");
+      const token =
+        localStorage.getItem("lms_token");
 
       if (!token) {
         setLoading(false);
@@ -32,13 +35,25 @@ export default function EnrollButton({
       }
 
       try {
+        // Check current user's enrollments
         const response = await fetch(
-          "http://localhost:1337/api/enrollments",
+          "http://localhost:1337/api/users/me?populate=enrollments.course",
           {
+            method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
+            cache: "no-store",
           }
+        );
+
+        const result =
+          await response.json();
+
+        console.log(
+          "ENROLLMENT CHECK:",
+          result
         );
 
         if (!response.ok) {
@@ -46,16 +61,18 @@ export default function EnrollButton({
           return;
         }
 
-        const result = await response.json();
-
         const enrollments: Enrollment[] =
-          result.data || [];
+          Array.isArray(result?.enrollments)
+            ? result.enrollments
+            : [];
 
-        const alreadyEnrolled = enrollments.some(
-          (enrollment) =>
-            enrollment.course?.documentId ===
-            courseDocumentId
-        );
+        const alreadyEnrolled =
+          enrollments.some(
+            (enrollment) =>
+              enrollment?.course
+                ?.documentId ===
+              courseDocumentId
+          );
 
         setEnrolled(alreadyEnrolled);
       } catch (error) {
@@ -72,9 +89,10 @@ export default function EnrollButton({
   }, [courseDocumentId]);
 
   async function handleEnroll() {
-    setMessage("Enrolling...");
+    setMessage("");
 
-    const token = localStorage.getItem("lms_token");
+    const token =
+      localStorage.getItem("lms_token");
 
     if (!token) {
       setMessage("Please login first.");
@@ -82,6 +100,8 @@ export default function EnrollButton({
     }
 
     try {
+      setMessage("Enrolling...");
+
       const response = await fetch(
         "http://localhost:1337/api/enrollments",
         {
@@ -98,38 +118,78 @@ export default function EnrollButton({
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
+
+      console.log(
+        "ENROLLMENT CREATE RESPONSE:",
+        data
+      );
 
       if (!response.ok) {
         setMessage(
           data?.error?.message ||
             "Enrollment failed."
         );
+
         return;
       }
 
       setEnrolled(true);
-      setMessage("Enrollment successful!");
+
+      setMessage(
+        "Enrollment successful!"
+      );
+
+      // Tell parent page that enrollment succeeded
+      if (onEnrollmentSuccess) {
+        onEnrollmentSuccess();
+      }
     } catch (error) {
-      console.error(error);
-      setMessage("Something went wrong.");
+      console.error(
+        "Enrollment error:",
+        error
+      );
+
+      setMessage(
+        "Something went wrong."
+      );
     }
   }
 
+  // =====================================
+  // LOADING
+  // =====================================
+
   if (loading) {
     return (
-      <div style={{ marginTop: "30px" }}>
-        <p>Checking enrollment...</p>
+      <div
+        style={{
+          marginTop: "20px",
+        }}
+      >
+        <p style={{ color: "#999" }}>
+          Checking enrollment...
+        </p>
       </div>
     );
   }
 
+  // =====================================
+  // ALREADY ENROLLED
+  // =====================================
+
   if (enrolled) {
     return (
-      <div style={{ marginTop: "30px" }}>
+      <div
+        style={{
+          marginTop: "20px",
+        }}
+      >
         <p
           style={{
             marginBottom: "15px",
+            color: "#22c55e",
           }}
         >
           ✓ Already Enrolled
@@ -140,31 +200,55 @@ export default function EnrollButton({
           style={{
             display: "inline-block",
             padding: "10px 18px",
-            border: "1px solid white",
-            borderRadius: "6px",
+            border: "1px solid #444",
+            borderRadius: "7px",
             textDecoration: "none",
+            color: "white",
           }}
         >
-          Continue Learning →
+          Go to My Courses →
         </Link>
       </div>
     );
   }
 
+  // =====================================
+  // ENROLL BUTTON
+  // =====================================
+
   return (
-    <div style={{ marginTop: "30px" }}>
+    <div
+      style={{
+        marginTop: "20px",
+      }}
+    >
       <button
+        type="button"
         onClick={handleEnroll}
         style={{
-          padding: "10px 18px",
+          padding: "11px 20px",
+          border: "1px solid white",
+          borderRadius: "7px",
+          background: "white",
+          color: "black",
           cursor: "pointer",
+          fontWeight: "600",
         }}
       >
         Enroll Now
       </button>
 
       {message && (
-        <p style={{ marginTop: "15px" }}>
+        <p
+          style={{
+            marginTop: "15px",
+            color:
+              message ===
+              "Enrollment successful!"
+                ? "#22c55e"
+                : "#aaa",
+          }}
+        >
           {message}
         </p>
       )}

@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type Role = "student" | "instructor" | "";
+type Role =
+  | "student"
+  | "instructor"
+  | "admin"
+  | "content-manager"
+  | "";
 
 type User = {
   id: number;
@@ -24,38 +29,39 @@ export default function Navbar() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    function readSavedRole(): Role {
-      const savedRole = localStorage.getItem("lms_role");
+    function normalizeRole(value: string | null): Role {
+      const roleName = value?.trim().toLowerCase();
 
-      if (savedRole === "student") {
-        return "student";
-      }
+      if (roleName === "student") return "student";
+      if (roleName === "instructor") return "instructor";
+      if (roleName === "admin") return "admin";
 
-      if (savedRole === "instructor") {
-        return "instructor";
+      if (
+        roleName === "content manager" ||
+        roleName === "content-manager" ||
+        roleName === "content_manager"
+      ) {
+        return "content-manager";
       }
 
       return "";
     }
 
+    function readSavedRole(): Role {
+      return normalizeRole(
+        localStorage.getItem("lms_role")
+      );
+    }
+
     async function loadUser() {
       const token = localStorage.getItem("lms_token");
 
-      /*
-       * No token = logged out
-       */
       if (!token) {
         setRole("");
         setChecking(false);
         return;
       }
 
-      /*
-       * First use the role saved during login.
-       *
-       * This is important because the Strapi /users/me
-       * response in your project is not returning role.
-       */
       const savedRole = readSavedRole();
 
       if (savedRole) {
@@ -63,13 +69,6 @@ export default function Navbar() {
         setChecking(false);
       }
 
-      /*
-       * Try to refresh user information from Strapi.
-       *
-       * IMPORTANT:
-       * If this request does not return role, we DO NOT
-       * remove the token or saved role.
-       */
       try {
         const response = await fetch(
           "http://localhost:1337/api/users/me?populate=role",
@@ -84,16 +83,6 @@ export default function Navbar() {
         );
 
         if (!response.ok) {
-          console.warn(
-            "Could not load user information:",
-            response.status
-          );
-
-          /*
-           * Do not logout the user here.
-           *
-           * If we already have lms_role, keep using it.
-           */
           if (!savedRole) {
             setRole("");
           }
@@ -105,18 +94,16 @@ export default function Navbar() {
         const user: User = await response.json();
 
         console.log("NAVBAR USER:", user);
-        console.log("NAVBAR ROLE:", user?.role?.name);
+        console.log(
+          "NAVBAR ROLE:",
+          user?.role?.name
+        );
 
-        const actualRole =
-          user?.role?.name?.trim().toLowerCase() || "";
+        const actualRole = normalizeRole(
+          user?.role?.name || ""
+        );
 
-        /*
-         * If Strapi gives us the role, update it.
-         */
-        if (
-          actualRole === "student" ||
-          actualRole === "instructor"
-        ) {
+        if (actualRole) {
           localStorage.setItem(
             "lms_role",
             actualRole
@@ -128,15 +115,8 @@ export default function Navbar() {
           );
 
           setRole(actualRole);
-        } else {
-          /*
-           * Strapi did not return role.
-           *
-           * Keep the previously saved role.
-           */
-          if (savedRole) {
-            setRole(savedRole);
-          }
+        } else if (savedRole) {
+          setRole(savedRole);
         }
       } catch (error) {
         console.error(
@@ -144,10 +124,6 @@ export default function Navbar() {
           error
         );
 
-        /*
-         * Never destroy a working login just because
-         * the user-information request failed.
-         */
         if (savedRole) {
           setRole(savedRole);
         }
@@ -156,11 +132,18 @@ export default function Navbar() {
       }
     }
 
-    window.addEventListener("lms-auth-changed", loadUser);
+    window.addEventListener(
+      "lms-auth-changed",
+      loadUser
+    );
+
     loadUser();
 
     return () => {
-      window.removeEventListener("lms-auth-changed", loadUser);
+      window.removeEventListener(
+        "lms-auth-changed",
+        loadUser
+      );
     };
   }, []);
 
@@ -174,9 +157,10 @@ export default function Navbar() {
     router.replace("/");
   }
 
-  /*
-   * LOGGED OUT NAVBAR
-   */
+  // ==========================================
+  // LOGGED OUT
+  // ==========================================
+
   if (!checking && !role) {
     return (
       <nav style={navStyle}>
@@ -189,15 +173,24 @@ export default function Navbar() {
             Home
           </Link>
 
-          <Link href="/courses" style={linkStyle}>
+          <Link
+            href="/courses"
+            style={linkStyle}
+          >
             Courses
           </Link>
 
-          <Link href="/login" style={linkStyle}>
+          <Link
+            href="/login"
+            style={linkStyle}
+          >
             Login
           </Link>
 
-          <Link href="/register" style={linkStyle}>
+          <Link
+            href="/register"
+            style={linkStyle}
+          >
             Register
           </Link>
         </div>
@@ -205,9 +198,10 @@ export default function Navbar() {
     );
   }
 
-  /*
-   * While checking, keep the navbar stable.
-   */
+  // ==========================================
+  // CHECKING
+  // ==========================================
+
   if (checking && !role) {
     return (
       <nav style={navStyle}>
@@ -220,7 +214,10 @@ export default function Navbar() {
             Home
           </Link>
 
-          <Link href="/courses" style={linkStyle}>
+          <Link
+            href="/courses"
+            style={linkStyle}
+          >
             Courses
           </Link>
         </div>
@@ -228,9 +225,92 @@ export default function Navbar() {
     );
   }
 
-  /*
-   * STUDENT NAVBAR
-   */
+  // ==========================================
+  // ADMIN
+  // ==========================================
+
+  if (role === "admin") {
+    return (
+      <nav style={navStyle}>
+        <Link
+          href="/admin/dashboard"
+          style={logoStyle}
+        >
+          LMS
+        </Link>
+
+        <div style={navLinksStyle}>
+          <Link
+            href="/admin/dashboard"
+            style={linkStyle}
+          >
+            Admin Dashboard
+          </Link>
+
+          <Link
+            href="/courses"
+            style={linkStyle}
+          >
+            Courses
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={logoutStyle}
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
+  // ==========================================
+  // CONTENT MANAGER
+  // ==========================================
+
+  if (role === "content-manager") {
+    return (
+      <nav style={navStyle}>
+        <Link
+          href="/admin/dashboard"
+          style={logoStyle}
+        >
+          LMS
+        </Link>
+
+        <div style={navLinksStyle}>
+          <Link
+            href="/admin/dashboard"
+            style={linkStyle}
+          >
+            Dashboard
+          </Link>
+
+          <Link
+            href="/courses"
+            style={linkStyle}
+          >
+            Courses
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={logoutStyle}
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
+  // ==========================================
+  // STUDENT
+  // ==========================================
+
   if (role === "student") {
     return (
       <nav style={navStyle}>
@@ -239,7 +319,10 @@ export default function Navbar() {
         </Link>
 
         <div style={navLinksStyle}>
-          <Link href="/" style={linkStyle}>
+          <Link
+            href="/"
+            style={linkStyle}
+          >
             Home
           </Link>
 
@@ -269,9 +352,10 @@ export default function Navbar() {
     );
   }
 
-  /*
-   * INSTRUCTOR NAVBAR
-   */
+  // ==========================================
+  // INSTRUCTOR
+  // ==========================================
+
   if (role === "instructor") {
     return (
       <nav style={navStyle}>
@@ -316,9 +400,10 @@ export default function Navbar() {
     );
   }
 
-  /*
-   * Fallback
-   */
+  // ==========================================
+  // FALLBACK
+  // ==========================================
+
   return (
     <nav style={navStyle}>
       <Link href="/" style={logoStyle}>
@@ -326,7 +411,10 @@ export default function Navbar() {
       </Link>
 
       <div style={navLinksStyle}>
-        <Link href="/" style={linkStyle}>
+        <Link
+          href="/"
+          style={linkStyle}
+        >
           Home
         </Link>
 
@@ -337,19 +425,13 @@ export default function Navbar() {
           Courses
         </Link>
 
-        <Link
-          href="/login"
-          style={linkStyle}
+        <button
+          type="button"
+          onClick={handleLogout}
+          style={logoutStyle}
         >
-          Login
-        </Link>
-
-        <Link
-          href="/register"
-          style={linkStyle}
-        >
-          Register
-        </Link>
+          Logout
+        </button>
       </div>
     </nav>
   );
