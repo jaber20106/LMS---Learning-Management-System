@@ -10,12 +10,32 @@ type Lesson = {
   content: string;
 };
 
+type QuizQuestion = {
+  id: number;
+  documentId: string;
+  question: string;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  correctAnswer: "A" | "B" | "C" | "D";
+};
+
+type Quiz = {
+  id: number;
+  documentId: string;
+  title: string;
+  description: string;
+  questions?: QuizQuestion[];
+};
+
 type Course = {
   id: number;
   documentId: string;
   title: string;
   description: string;
   lessons?: Lesson[];
+  quizzes?: Quiz[];
 };
 
 type Enrollment = {
@@ -54,7 +74,7 @@ export default function MyCoursesPage() {
 
       try {
         const response = await fetch(
-          "http://localhost:1337/api/users/me?populate[enrollments][populate][course][populate]=lessons",
+          "http://localhost:1337/api/users/me?populate[enrollments][populate][course][populate][0]=lessons&populate[enrollments][populate][course][populate][1]=quizzes",
           {
             method: "GET",
             headers: {
@@ -114,6 +134,7 @@ export default function MyCoursesPage() {
           uniqueEnrollments.push(enrollment);
         }
 
+        
         setEnrollments(uniqueEnrollments);
       } catch (error) {
         console.error(
@@ -147,6 +168,7 @@ export default function MyCoursesPage() {
           }}
         >
           <h1>My Courses</h1>
+
           <p style={{ color: "#999" }}>
             Loading your courses...
           </p>
@@ -317,6 +339,7 @@ export default function MyCoursesPage() {
               }
 
               const lessons = course.lessons || [];
+              const quizzes = course.quizzes || [];
 
               return (
                 <article
@@ -356,6 +379,8 @@ export default function MyCoursesPage() {
                   >
                     {course.description}
                   </p>
+
+                  {/* LESSONS */}
 
                   <div
                     style={{
@@ -408,6 +433,123 @@ export default function MyCoursesPage() {
                               Lesson {index + 1}:{" "}
                               {lesson.title}
                             </Link>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* QUIZZES */}
+
+                  <div
+                    style={{
+                      marginTop: "22px",
+                      paddingTop: "18px",
+                      borderTop: "1px solid #292929",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: "18px",
+                      }}
+                    >
+                      Quizzes ({quizzes.length})
+                    </h3>
+
+                    {quizzes.length === 0 ? (
+                      <p
+                        style={{
+                          color: "#777",
+                          marginTop: "12px",
+                        }}
+                      >
+                        No quizzes available yet.
+                      </p>
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                        }}
+                      >
+                        {quizzes.map(
+                          (quiz, index) => (
+                            <div
+                              key={
+                                quiz.documentId
+                              }
+                              style={{
+                                padding:
+                                  "14px 0",
+                                borderBottom:
+                                  "1px solid #222",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent:
+                                    "space-between",
+                                  alignItems:
+                                    "center",
+                                  gap: "12px",
+                                }}
+                              >
+                                <div>
+                                  <p
+                                    style={{
+                                      margin: 0,
+                                      color:
+                                        "white",
+                                      fontWeight:
+                                        "600",
+                                    }}
+                                  >
+                                    Quiz {index + 1}:{" "}
+                                    {quiz.title}
+                                  </p>
+
+                                  <p
+                                    style={{
+                                      margin:
+                                        "5px 0 0",
+                                      color:
+                                        "#777",
+                                      fontSize:
+                                        "13px",
+                                    }}
+                                  >
+                                    {quiz.questions
+                                      ?.length || 0}{" "}
+                                    questions
+                                  </p>
+                                </div>
+
+                                <Link
+                                  href={`/quizzes/${quiz.documentId}`}
+                                  style={{
+                                    padding:
+                                      "8px 12px",
+                                    borderRadius:
+                                      "7px",
+                                    background:
+                                      "white",
+                                    color:
+                                      "black",
+                                    textDecoration:
+                                      "none",
+                                    fontSize:
+                                      "13px",
+                                    fontWeight:
+                                      "700",
+                                    whiteSpace:
+                                      "nowrap",
+                                  }}
+                                >
+                                  Start Quiz
+                                </Link>
+                              </div>
+                            </div>
                           )
                         )}
                       </div>

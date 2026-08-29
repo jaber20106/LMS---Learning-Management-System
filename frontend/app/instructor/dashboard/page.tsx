@@ -343,6 +343,23 @@ export default function InstructorDashboard() {
           >
             + Create Course
           </Link>
+          <Link
+  href="/instructor/dashboard/quizzes"
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "12px 18px",
+    borderRadius: "8px",
+    border: "1px solid #444",
+    color: "white",
+    textDecoration: "none",
+    fontWeight: "600",
+    whiteSpace: "nowrap",
+  }}
+>
+  Quizzes
+</Link>
         </div>
 
         {/* Message */}
