@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Lesson = {
   id: number;
@@ -17,10 +17,12 @@ type Progress = {
   completed: boolean;
   completedAt?: string | null;
   lesson?: {
+    id?: number;
     documentId?: string;
   } | null;
   user?: {
     id?: number;
+    documentId?: string;
   } | null;
 };
 
@@ -55,14 +57,17 @@ export default function LessonDetailsPage({
 
     async function loadLesson() {
       try {
-        const { documentId } = await params;
+        const { documentId } =
+          await params;
 
         const token =
           localStorage.getItem("lms_token");
 
         if (!token) {
           if (!cancelled) {
-            setMessage("Please login first.");
+            setMessage(
+              "Please login first."
+            );
             setLoading(false);
           }
 
@@ -86,7 +91,8 @@ export default function LessonDetailsPage({
             {
               method: "GET",
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization:
+                  `Bearer ${token}`,
                 "Content-Type":
                   "application/json",
               },
@@ -144,7 +150,8 @@ export default function LessonDetailsPage({
             {
               method: "GET",
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization:
+                  `Bearer ${token}`,
                 "Content-Type":
                   "application/json",
               },
@@ -185,19 +192,21 @@ export default function LessonDetailsPage({
         }
 
         // ======================================
-        // 3. GET CURRENT USER'S PROGRESS
-        // FOR CURRENT LESSON ONLY
+        // 3. GET ALL PROGRESS
+        //
+        // Don't use the old nested filter.
+        // We filter current user + lesson
+        // on the client side.
         // ======================================
 
         const progressResponse =
           await fetch(
-            `http://localhost:1337/api/lesson-progresses?filters[lesson][documentId][$eq]=${encodeURIComponent(
-              documentId
-            )}&filters[user][id][$eq]=${currentUserId}&populate=lesson&populate=user`,
+            "http://localhost:1337/api/lesson-progresses?populate=*",
             {
               method: "GET",
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization:
+                  `Bearer ${token}`,
                 "Content-Type":
                   "application/json",
               },
@@ -209,29 +218,70 @@ export default function LessonDetailsPage({
           await progressResponse.json();
 
         console.log(
-          "CURRENT LESSON PROGRESS:",
+          "ALL PROGRESS RESPONSE:",
           progressResult
         );
 
-        if (
-          progressResponse.ok &&
-          Array.isArray(
-            progressResult?.data
-          )
-        ) {
-          const currentProgress =
-            progressResult.data[0] ||
-            null;
+        if (!progressResponse.ok) {
+          console.error(
+            "PROGRESS GET ERROR:",
+            progressResult
+          );
 
-          if (!cancelled) {
-            setProgress(
-              currentProgress
-            );
-          }
-        } else {
+          // Don't stop lesson page.
+          // User can still try Mark Complete.
           if (!cancelled) {
             setProgress(null);
           }
+
+          return;
+        }
+
+        const progressList: Progress[] =
+          Array.isArray(
+            progressResult?.data
+          )
+            ? progressResult.data
+            : [];
+
+        console.log(
+          "ALL PROGRESS:",
+          progressList
+        );
+
+        // ======================================
+        // FIND PROGRESS FOR THIS USER + LESSON
+        // ======================================
+
+        const currentProgress =
+          progressList.find(
+            (item) => {
+              const progressUserId =
+  item?.user?.id ||
+  item?.user?.data?.id;
+
+              const progressLessonId =
+  item?.lesson?.documentId ||
+  item?.lesson?.data?.documentId;
+
+              return (
+                progressUserId ===
+                  currentUserId &&
+                progressLessonId ===
+                  documentId
+              );
+            }
+          ) || null;
+
+        console.log(
+          "CURRENT LESSON PROGRESS:",
+          currentProgress
+        );
+
+        if (!cancelled) {
+          setProgress(
+            currentProgress
+          );
         }
       } catch (error) {
         console.error(
@@ -273,12 +323,16 @@ export default function LessonDetailsPage({
         localStorage.getItem("lms_token");
 
       if (!token) {
-        setMessage("Please login first.");
+        setMessage(
+          "Please login first."
+        );
         return;
       }
 
       if (!lesson) {
-        setMessage("Lesson not found.");
+        setMessage(
+          "Lesson not found."
+        );
         return;
       }
 
@@ -292,7 +346,8 @@ export default function LessonDetailsPage({
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization:
+                `Bearer ${token}`,
               "Content-Type":
                 "application/json",
             },
@@ -302,6 +357,11 @@ export default function LessonDetailsPage({
 
       const userResult =
         await userResponse.json();
+
+      console.log(
+        "MARK COMPLETE USER:",
+        userResult
+      );
 
       if (!userResponse.ok) {
         throw new Error(
@@ -326,13 +386,13 @@ export default function LessonDetailsPage({
       // UPDATE EXISTING PROGRESS
       // ======================================
 
-      if (progress) {
+      if (progress?.documentId) {
         console.log(
           "UPDATING PROGRESS:",
           progress.documentId
         );
 
-        const response =
+        const updateResponse =
           await fetch(
             `http://localhost:1337/api/lesson-progresses/${encodeURIComponent(
               progress.documentId
@@ -340,10 +400,12 @@ export default function LessonDetailsPage({
             {
               method: "PUT",
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization:
+                  `Bearer ${token}`,
                 "Content-Type":
                   "application/json",
               },
+              cache: "no-store",
               body: JSON.stringify({
                 data: {
                   completed: true,
@@ -353,22 +415,25 @@ export default function LessonDetailsPage({
             }
           );
 
-        const result =
-          await response.json();
+        const updateResult =
+          await updateResponse.json();
 
         console.log(
           "UPDATE PROGRESS RESULT:",
-          result
+          updateResult
         );
 
-        if (!response.ok) {
+        if (!updateResponse.ok) {
           throw new Error(
-            result?.error?.message ||
-              "Failed to update lesson progress."
+            updateResult?.error?.message ||
+              `Failed to update progress. Status: ${updateResponse.status}`
           );
         }
 
-        setProgress(result.data);
+        setProgress(
+          updateResult?.data ||
+            progress
+        );
 
         setMessage(
           "Lesson marked as complete! ✓"
@@ -382,49 +447,72 @@ export default function LessonDetailsPage({
       // ======================================
 
       console.log(
-        "CREATING PROGRESS"
+        "CREATING NEW PROGRESS"
       );
 
-      const response =
+      const createResponse =
         await fetch(
           "http://localhost:1337/api/lesson-progresses",
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization:
+                `Bearer ${token}`,
               "Content-Type":
                 "application/json",
             },
+            cache: "no-store",
             body: JSON.stringify({
               data: {
                 completed: true,
                 completedAt,
 
-                user: currentUserId,
+                user: {
+                  connect: [
+                    currentUserId,
+                  ],
+                },
 
-                lesson:
-                  lesson.documentId,
+                lesson: {
+                  connect: [
+                    lesson.documentId,
+                  ],
+                },
               },
             }),
           }
         );
 
-      const result =
-        await response.json();
+      const createResult =
+        await createResponse.json();
 
       console.log(
         "CREATE PROGRESS RESULT:",
-        result
+        createResult
       );
 
-      if (!response.ok) {
+      if (!createResponse.ok) {
         throw new Error(
-          result?.error?.message ||
-            "Failed to create lesson progress."
+          createResult?.error?.message ||
+            `Failed to create progress. Status: ${createResponse.status}`
         );
       }
 
-      setProgress(result.data);
+      setProgress(
+        createResult?.data || {
+          id: 0,
+          documentId: "",
+          completed: true,
+          completedAt,
+          user: {
+            id: currentUserId,
+          },
+          lesson: {
+            documentId:
+              lesson.documentId,
+          },
+        }
+      );
 
       setMessage(
         "Lesson marked as complete! ✓"
@@ -463,7 +551,11 @@ export default function LessonDetailsPage({
             margin: "0 auto",
           }}
         >
-          <p style={{ color: "#999" }}>
+          <p
+            style={{
+              color: "#999",
+            }}
+          >
             Loading lesson...
           </p>
         </div>
@@ -472,7 +564,7 @@ export default function LessonDetailsPage({
   }
 
   // ==========================================
-  // ERROR / LESSON NOT FOUND
+  // ERROR
   // ==========================================
 
   if (!lesson) {
@@ -503,7 +595,9 @@ export default function LessonDetailsPage({
 
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() =>
+              router.back()
+            }
             style={{
               marginTop: "20px",
               padding: "10px 18px",
@@ -525,6 +619,9 @@ export default function LessonDetailsPage({
   // LESSON PAGE
   // ==========================================
 
+  const isCompleted =
+    progress?.completed === true;
+
   return (
     <main
       style={{
@@ -542,7 +639,9 @@ export default function LessonDetailsPage({
 
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() =>
+            router.back()
+          }
           style={{
             display: "inline-block",
             marginBottom: "30px",
@@ -568,9 +667,9 @@ export default function LessonDetailsPage({
         >
           <p
             style={{
-              color: "#777",
-              fontSize: "14px",
               margin: 0,
+              color: "#888",
+              fontSize: "14px",
             }}
           >
             Lesson
@@ -584,44 +683,43 @@ export default function LessonDetailsPage({
             {lesson.title}
           </h1>
 
-          <div
+          <p
             style={{
-              marginTop: "30px",
+              marginTop: "20px",
               lineHeight: "1.8",
+              color: "#aaa",
               whiteSpace: "pre-wrap",
-              color: "#ccc",
             }}
           >
             {lesson.content}
-          </div>
+          </p>
 
-          {/* COMPLETE */}
+          {/* COMPLETE AREA */}
 
           <div
             style={{
               marginTop: "40px",
               paddingTop: "25px",
-              borderTop: "1px solid #333",
+              borderTop:
+                "1px solid #333",
             }}
           >
-            {progress?.completed ? (
+            {isCompleted ? (
               <div>
-                <p
+                <h3
                   style={{
+                    margin: 0,
                     color: "#22c55e",
-                    fontWeight: "600",
-                    fontSize: "18px",
                   }}
                 >
                   ✓ Lesson Completed
-                </p>
+                </h3>
 
-                {progress.completedAt && (
+                {progress?.completedAt && (
                   <p
                     style={{
                       marginTop: "10px",
-                      color: "#777",
-                      fontSize: "14px",
+                      color: "#999",
                     }}
                   >
                     Completed at:{" "}
@@ -637,19 +735,24 @@ export default function LessonDetailsPage({
                 onClick={markComplete}
                 disabled={completing}
                 style={{
-                  padding: "12px 20px",
-                  border: "1px solid white",
+                  padding:
+                    "12px 20px",
+                  border:
+                    "1px solid #444",
                   borderRadius: "7px",
-                  background: completing
-                    ? "#333"
-                    : "white",
-                  color: completing
-                    ? "#999"
-                    : "black",
-                  cursor: completing
-                    ? "not-allowed"
-                    : "pointer",
-                  fontWeight: "600",
+                  background:
+                    completing
+                      ? "#222"
+                      : "white",
+                  color:
+                    completing
+                      ? "#888"
+                      : "black",
+                  cursor:
+                    completing
+                      ? "not-allowed"
+                      : "pointer",
+                  fontWeight: "700",
                 }}
               >
                 {completing
@@ -661,12 +764,13 @@ export default function LessonDetailsPage({
             {message && (
               <p
                 style={{
-                  marginTop: "15px",
-                  color: message.includes(
-                    "complete"
-                  )
-                    ? "#22c55e"
-                    : "#aaa",
+                  marginTop: "18px",
+                  color:
+                    message.includes(
+                      "complete"
+                    )
+                      ? "#22c55e"
+                      : "#ff7777",
                 }}
               >
                 {message}

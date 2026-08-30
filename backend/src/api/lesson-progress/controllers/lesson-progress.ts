@@ -30,7 +30,10 @@ export default factories.createCoreController(
         );
       }
 
-      // Find lesson
+      // ==========================================
+      // FIND LESSON
+      // ==========================================
+
       const lesson =
         await strapi
           .documents("api::lesson.lesson")
@@ -46,7 +49,7 @@ export default factories.createCoreController(
       }
 
       // ==========================================
-      // FIND EXISTING USER + LESSON PROGRESS
+      // FIND EXISTING PROGRESS
       // ==========================================
 
       const existingProgress =
@@ -64,13 +67,14 @@ export default factories.createCoreController(
       const completed =
         body.completed === true;
 
-      const completedAt = completed
-        ? body.completedAt ||
-          new Date().toISOString()
-        : null;
+      const completedAt =
+        completed
+          ? body.completedAt ||
+            new Date().toISOString()
+          : null;
 
       // ==========================================
-      // UPDATE EXISTING
+      // UPDATE EXISTING PROGRESS
       // ==========================================
 
       if (existingProgress) {
@@ -101,7 +105,7 @@ export default factories.createCoreController(
       }
 
       // ==========================================
-      // CREATE NEW
+      // CREATE NEW PROGRESS
       // ==========================================
 
       const progress =
@@ -114,10 +118,12 @@ export default factories.createCoreController(
               completed,
               completedAt,
 
-              // Always logged-in user
+              // IMPORTANT:
+              // Always use logged-in user
               user: user.id,
 
-              // Current lesson
+              // IMPORTANT:
+              // Use database lesson ID
               lesson: lesson.id,
             },
           });
@@ -133,7 +139,7 @@ export default factories.createCoreController(
     },
 
     // ==========================================
-    // MY COURSE PROGRESS
+    // GET MY COURSE PROGRESS
     // ==========================================
 
     async myProgress(ctx) {
@@ -145,14 +151,52 @@ export default factories.createCoreController(
         );
       }
 
+      // ========================================
+      // GET QUERY PARAMETER
+      // ========================================
+
       const courseDocumentId =
-        ctx.query.courseDocumentId;
+        String(
+          ctx.query?.courseDocumentId || ""
+        ).trim();
+
+      console.log(
+        "MY PROGRESS COURSE ID:",
+        courseDocumentId
+      );
 
       if (!courseDocumentId) {
         return ctx.badRequest(
           "courseDocumentId is required."
         );
       }
+
+      // ========================================
+      // FIND COURSE FIRST
+      // ========================================
+
+      const course =
+        await strapi
+          .documents("api::course.course")
+          .findOne({
+            documentId:
+              courseDocumentId,
+          });
+
+      console.log(
+        "MY PROGRESS COURSE:",
+        course
+      );
+
+      if (!course) {
+        return ctx.notFound(
+          "Course not found."
+        );
+      }
+
+      // ========================================
+      // GET USER'S COMPLETED PROGRESS
+      // ========================================
 
       const progresses =
         await strapi.db
@@ -174,23 +218,41 @@ export default factories.createCoreController(
             },
           });
 
+      console.log(
+        "USER COMPLETED PROGRESS:",
+        progresses
+      );
+
+      // ========================================
+      // FILTER CURRENT COURSE
+      // ========================================
+
       const completedLessonIds =
         progresses
           .filter((progress: any) => {
-            const course =
+            const progressCourse =
               progress?.lesson?.course;
 
+            if (!progressCourse) {
+              return false;
+            }
+
             return (
-              course?.documentId ===
-              courseDocumentId
+              progressCourse.id ===
+                course.id ||
+              progressCourse.documentId ===
+                course.documentId
             );
           })
           .map((progress: any) => {
-            return progress.lesson.documentId;
-          });
+            return (
+              progress?.lesson?.documentId
+            );
+          })
+          .filter(Boolean);
 
       console.log(
-        "MY COURSE PROGRESS:",
+        "COMPLETED LESSON IDS:",
         completedLessonIds
       );
 

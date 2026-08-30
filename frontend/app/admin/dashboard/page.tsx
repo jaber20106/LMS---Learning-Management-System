@@ -25,12 +25,21 @@ type Lesson = {
   title: string;
 };
 
+type Quiz = {
+  id: number;
+  documentId: string;
+  title: string;
+  description?: string;
+};
+
 const API_URL = "http://localhost:1337";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -48,7 +57,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Frontend protection
     if (role !== "admin") {
       setMessage("Access denied. Admin only.");
       setLoading(false);
@@ -60,23 +68,32 @@ export default function AdminDashboard() {
         Authorization: `Bearer ${token}`,
       };
 
-      const [usersResponse, coursesResponse, lessonsResponse] =
-        await Promise.all([
-          fetch(`${API_URL}/api/users`, {
-            headers,
-            cache: "no-store",
-          }),
+      const [
+        usersResponse,
+        coursesResponse,
+        lessonsResponse,
+        quizzesResponse,
+      ] = await Promise.all([
+        fetch(`${API_URL}/api/users`, {
+          headers,
+          cache: "no-store",
+        }),
 
-          fetch(`${API_URL}/api/courses?populate=*`, {
-            headers,
-            cache: "no-store",
-          }),
+        fetch(`${API_URL}/api/courses?populate=*`, {
+          headers,
+          cache: "no-store",
+        }),
 
-          fetch(`${API_URL}/api/lessons?populate=*`, {
-            headers,
-            cache: "no-store",
-          }),
-        ]);
+        fetch(`${API_URL}/api/lessons?populate=*`, {
+          headers,
+          cache: "no-store",
+        }),
+
+        fetch(`${API_URL}/api/quizzes?populate=*`, {
+          headers,
+          cache: "no-store",
+        }),
+      ]);
 
       if (!usersResponse.ok) {
         throw new Error("Failed to fetch users");
@@ -90,31 +107,57 @@ export default function AdminDashboard() {
         throw new Error("Failed to fetch lessons");
       }
 
+      if (!quizzesResponse.ok) {
+        throw new Error("Failed to fetch quizzes");
+      }
+
       const usersData = await usersResponse.json();
       const coursesData = await coursesResponse.json();
       const lessonsData = await lessonsResponse.json();
+      const quizzesData = await quizzesResponse.json();
 
-      setUsers(usersData || []);
-      setCourses(coursesData?.data || []);
-      setLessons(lessonsData?.data || []);
+      setUsers(
+        Array.isArray(usersData)
+          ? usersData
+          : []
+      );
+
+      setCourses(
+        coursesData?.data || []
+      );
+
+      setLessons(
+        lessonsData?.data || []
+      );
+
+      setQuizzes(
+        quizzesData?.data || []
+      );
     } catch (error) {
-      console.error("ADMIN DASHBOARD ERROR:", error);
-      setMessage("Failed to load admin dashboard.");
+      console.error(
+        "ADMIN DASHBOARD ERROR:",
+        error
+      );
+
+      setMessage(
+        "Failed to load admin dashboard."
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  async function deleteCourse(documentId: string) {
+  async function deleteCourse(
+    documentId: string
+  ) {
     const confirmed = window.confirm(
       "Are you sure you want to delete this course?"
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
-    const token = localStorage.getItem("lms_token");
+    const token =
+      localStorage.getItem("lms_token");
 
     if (!token) {
       setMessage("Please login first.");
@@ -127,12 +170,14 @@ export default function AdminDashboard() {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );
 
-      const result = await response.json();
+      const result =
+        await response.json();
 
       if (!response.ok) {
         setMessage(
@@ -142,29 +187,36 @@ export default function AdminDashboard() {
         return;
       }
 
-      setCourses((currentCourses) =>
-        currentCourses.filter(
-          (course) => course.documentId !== documentId
+      setCourses((current) =>
+        current.filter(
+          (course) =>
+            course.documentId !==
+            documentId
         )
       );
 
-      setMessage("Course deleted successfully.");
+      setMessage(
+        "Course deleted successfully."
+      );
     } catch (error) {
       console.error(error);
-      setMessage("Something went wrong.");
+      setMessage(
+        "Something went wrong."
+      );
     }
   }
 
-  async function deleteLesson(documentId: string) {
+  async function deleteLesson(
+    documentId: string
+  ) {
     const confirmed = window.confirm(
       "Are you sure you want to delete this lesson?"
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
-    const token = localStorage.getItem("lms_token");
+    const token =
+      localStorage.getItem("lms_token");
 
     if (!token) {
       setMessage("Please login first.");
@@ -177,12 +229,14 @@ export default function AdminDashboard() {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );
 
-      const result = await response.json();
+      const result =
+        await response.json();
 
       if (!response.ok) {
         setMessage(
@@ -192,16 +246,81 @@ export default function AdminDashboard() {
         return;
       }
 
-      setLessons((currentLessons) =>
-        currentLessons.filter(
-          (lesson) => lesson.documentId !== documentId
+      setLessons((current) =>
+        current.filter(
+          (lesson) =>
+            lesson.documentId !==
+            documentId
         )
       );
 
-      setMessage("Lesson deleted successfully.");
+      setMessage(
+        "Lesson deleted successfully."
+      );
     } catch (error) {
       console.error(error);
-      setMessage("Something went wrong.");
+      setMessage(
+        "Something went wrong."
+      );
+    }
+  }
+
+  async function deleteQuiz(
+    documentId: string
+  ) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this quiz?"
+    );
+
+    if (!confirmed) return;
+
+    const token =
+      localStorage.getItem("lms_token");
+
+    if (!token) {
+      setMessage("Please login first.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/quizzes/${documentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const result =
+        await response.json();
+
+      if (!response.ok) {
+        setMessage(
+          result?.error?.message ||
+            "Failed to delete quiz."
+        );
+        return;
+      }
+
+      setQuizzes((current) =>
+        current.filter(
+          (quiz) =>
+            quiz.documentId !==
+            documentId
+        )
+      );
+
+      setMessage(
+        "Quiz deleted successfully."
+      );
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        "Something went wrong."
+      );
     }
   }
 
@@ -219,13 +338,18 @@ export default function AdminDashboard() {
             margin: "0 auto",
           }}
         >
-          <p>Loading admin dashboard...</p>
+          <p>
+            Loading admin dashboard...
+          </p>
         </div>
       </main>
     );
   }
 
-  if (message === "Access denied. Admin only.") {
+  if (
+    message ===
+    "Access denied. Admin only."
+  ) {
     return (
       <main
         style={{
@@ -247,7 +371,8 @@ export default function AdminDashboard() {
               marginTop: "10px",
             }}
           >
-            Only administrators can access this page.
+            Only administrators can
+            access this page.
           </p>
         </div>
       </main>
@@ -267,10 +392,13 @@ export default function AdminDashboard() {
           margin: "0 auto",
         }}
       >
+        {/* HEADER */}
+
         <div
           style={{
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent:
+              "space-between",
             alignItems: "center",
             gap: "20px",
             marginBottom: "10px",
@@ -301,8 +429,10 @@ export default function AdminDashboard() {
             style={{
               padding: "10px 18px",
               borderRadius: "8px",
-              border: "1px solid #444",
-              background: "transparent",
+              border:
+                "1px solid #444",
+              background:
+                "transparent",
               color: "white",
               cursor: "pointer",
             }}
@@ -317,16 +447,19 @@ export default function AdminDashboard() {
             marginBottom: "40px",
           }}
         >
-          Manage users, courses and lessons.
+          Manage users, courses,
+          lessons and quizzes.
         </p>
 
         {message &&
-          message !== "Access denied. Admin only." && (
+          message !==
+            "Access denied. Admin only." && (
             <div
               style={{
                 marginBottom: "25px",
                 padding: "14px",
-                border: "1px solid #333",
+                border:
+                  "1px solid #333",
                 borderRadius: "8px",
               }}
             >
@@ -340,7 +473,7 @@ export default function AdminDashboard() {
           style={{
             display: "grid",
             gridTemplateColumns:
-              "repeat(auto-fit, minmax(220px, 1fr))",
+              "repeat(auto-fit, minmax(200px, 1fr))",
             gap: "20px",
             marginBottom: "45px",
           }}
@@ -359,19 +492,23 @@ export default function AdminDashboard() {
             title="Total Lessons"
             value={lessons.length}
           />
+
+          <StatCard
+            title="Total Quizzes"
+            value={quizzes.length}
+          />
         </div>
 
         {/* COURSES */}
 
-        <section style={{ marginBottom: "50px" }}>
-          <h2
-            style={{
-              fontSize: "28px",
-              marginBottom: "20px",
-            }}
-          >
-            Courses
-          </h2>
+        <section
+          style={{
+            marginBottom: "50px",
+          }}
+        >
+          <SectionHeader
+            title="Courses"
+          />
 
           {courses.length === 0 ? (
             <EmptyState text="No courses found." />
@@ -384,69 +521,72 @@ export default function AdminDashboard() {
                 gap: "20px",
               }}
             >
-              {courses.map((course) => (
-                <div
-                  key={course.documentId}
-                  style={{
-                    border: "1px solid #333",
-                    borderRadius: "12px",
-                    padding: "22px",
-                    background: "#111",
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontSize: "22px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    {course.title}
-                  </h3>
-
-                  <p
-                    style={{
-                      color: "#aaa",
-                      lineHeight: "1.5",
-                      minHeight: "45px",
-                    }}
-                  >
-                    {course.description ||
-                      "No description available."}
-                  </p>
-
-                  <button
-                    onClick={() =>
-                      deleteCourse(course.documentId)
+              {courses.map(
+                (course) => (
+                  <div
+                    key={
+                      course.documentId
                     }
                     style={{
-                      marginTop: "18px",
-                      padding: "9px 15px",
-                      borderRadius: "7px",
-                      border: "1px solid #733",
-                      background: "transparent",
-                      color: "#ff7777",
-                      cursor: "pointer",
+                      border:
+                        "1px solid #333",
+                      borderRadius:
+                        "12px",
+                      padding: "22px",
+                      background:
+                        "#111",
                     }}
                   >
-                    Delete Course
-                  </button>
-                </div>
-              ))}
+                    <h3
+                      style={{
+                        fontSize: "22px",
+                        marginBottom:
+                          "10px",
+                      }}
+                    >
+                      {course.title}
+                    </h3>
+
+                    <p
+                      style={{
+                        color: "#aaa",
+                        lineHeight:
+                          "1.5",
+                        minHeight:
+                          "45px",
+                      }}
+                    >
+                      {course.description ||
+                        "No description available."}
+                    </p>
+
+                    <button
+                      onClick={() =>
+                        deleteCourse(
+                          course.documentId
+                        )
+                      }
+                      style={deleteButtonStyle}
+                    >
+                      Delete Course
+                    </button>
+                  </div>
+                )
+              )}
             </div>
           )}
         </section>
 
         {/* LESSONS */}
 
-        <section>
-          <h2
-            style={{
-              fontSize: "28px",
-              marginBottom: "20px",
-            }}
-          >
-            Lessons
-          </h2>
+        <section
+          style={{
+            marginBottom: "50px",
+          }}
+        >
+          <SectionHeader
+            title="Lessons"
+          />
 
           {lessons.length === 0 ? (
             <EmptyState text="No lessons found." />
@@ -457,60 +597,221 @@ export default function AdminDashboard() {
                 gap: "12px",
               }}
             >
-              {lessons.map((lesson, index) => (
-                <div
-                  key={lesson.documentId}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "20px",
-                    border: "1px solid #333",
-                    borderRadius: "10px",
-                    padding: "18px 20px",
-                    background: "#111",
-                  }}
-                >
-                  <div>
+              {lessons.map(
+                (lesson, index) => (
+                  <div
+                    key={
+                      lesson.documentId
+                    }
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        "space-between",
+                      alignItems:
+                        "center",
+                      gap: "20px",
+                      border:
+                        "1px solid #333",
+                      borderRadius:
+                        "10px",
+                      padding:
+                        "18px 20px",
+                      background:
+                        "#111",
+                    }}
+                  >
+                    <div>
+                      <p
+                        style={{
+                          color: "#777",
+                          fontSize:
+                            "14px",
+                          marginBottom:
+                            "5px",
+                        }}
+                      >
+                        Lesson{" "}
+                        {index + 1}
+                      </p>
+
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize:
+                            "18px",
+                        }}
+                      >
+                        {lesson.title}
+                      </h3>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        deleteLesson(
+                          lesson.documentId
+                        )
+                      }
+                      style={deleteButtonStyle}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* QUIZZES */}
+
+        <section
+          style={{
+            marginBottom: "50px",
+          }}
+        >
+          <SectionHeader
+            title="Quizzes"
+            buttonText="Create Quiz"
+            onButtonClick={() => {
+              window.location.href =
+                "/instructor/dashboard/quizzes";
+            }}
+          />
+
+          {quizzes.length === 0 ? (
+            <EmptyState text="No quizzes found." />
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "20px",
+              }}
+            >
+              {quizzes.map(
+                (quiz) => (
+                  <div
+                    key={
+                      quiz.documentId
+                    }
+                    style={{
+                      border:
+                        "1px solid #333",
+                      borderRadius:
+                        "12px",
+                      padding: "22px",
+                      background:
+                        "#111",
+                    }}
+                  >
                     <p
                       style={{
                         color: "#777",
-                        fontSize: "14px",
-                        marginBottom: "5px",
+                        fontSize:
+                          "14px",
+                        marginBottom:
+                          "8px",
                       }}
                     >
-                      Lesson {index + 1}
+                      Quiz
                     </p>
 
                     <h3
                       style={{
-                        margin: 0,
-                        fontSize: "18px",
+                        fontSize: "22px",
+                        marginBottom:
+                          "10px",
                       }}
                     >
-                      {lesson.title}
+                      {quiz.title}
                     </h3>
-                  </div>
 
-                  <button
-                    onClick={() =>
-                      deleteLesson(
-                        lesson.documentId
-                      )
-                    }
-                    style={{
-                      padding: "8px 14px",
-                      borderRadius: "7px",
-                      border: "1px solid #733",
-                      background: "transparent",
-                      color: "#ff7777",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))}
+                    <p
+                      style={{
+                        color: "#aaa",
+                        lineHeight:
+                          "1.5",
+                        minHeight:
+                          "45px",
+                      }}
+                    >
+                      {quiz.description ||
+                        "No description available."}
+                    </p>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        flexWrap:
+                          "wrap",
+                        marginTop:
+                          "18px",
+                      }}
+                    >
+                      <button
+                        onClick={() =>
+                          window.location.href =
+                            `/instructor/dashboard/quizzes/edit/${quiz.documentId}`
+                        }
+                        style={{
+                          padding:
+                            "9px 15px",
+                          borderRadius:
+                            "7px",
+                          border:
+                            "1px solid #444",
+                          background:
+                            "transparent",
+                          color:
+                            "white",
+                          cursor:
+                            "pointer",
+                        }}
+                      >
+                        Edit Quiz
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          window.location.href =
+                            `/quizzes/${quiz.documentId}`
+                        }
+                        style={{
+                          padding:
+                            "9px 15px",
+                          borderRadius:
+                            "7px",
+                          border:
+                            "1px solid #444",
+                          background:
+                            "transparent",
+                          color:
+                            "#aaa",
+                          cursor:
+                            "pointer",
+                        }}
+                      >
+                        View Quiz
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          deleteQuiz(
+                            quiz.documentId
+                          )
+                        }
+                        style={
+                          deleteButtonStyle
+                        }
+                      >
+                        Delete Quiz
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
           )}
         </section>
@@ -555,11 +856,66 @@ function StatCard({
   );
 }
 
-function EmptyState({ text }: { text: string }) {
+function SectionHeader({
+  title,
+  buttonText,
+  onButtonClick,
+}: {
+  title: string;
+  buttonText?: string;
+  onButtonClick?: () => void;
+}) {
   return (
     <div
       style={{
-        border: "1px dashed #444",
+        display: "flex",
+        justifyContent:
+          "space-between",
+        alignItems: "center",
+        marginBottom: "20px",
+        gap: "20px",
+      }}
+    >
+      <h2
+        style={{
+          fontSize: "28px",
+          margin: 0,
+        }}
+      >
+        {title}
+      </h2>
+
+      {buttonText &&
+        onButtonClick && (
+          <button
+            onClick={onButtonClick}
+            style={{
+              padding: "10px 16px",
+              borderRadius: "8px",
+              border: "none",
+              background: "white",
+              color: "black",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            + {buttonText}
+          </button>
+        )}
+    </div>
+  );
+}
+
+function EmptyState({
+  text,
+}: {
+  text: string;
+}) {
+  return (
+    <div
+      style={{
+        border:
+          "1px dashed #444",
         borderRadius: "10px",
         padding: "30px",
         color: "#888",
@@ -569,3 +925,13 @@ function EmptyState({ text }: { text: string }) {
     </div>
   );
 }
+
+const deleteButtonStyle = {
+  marginTop: "18px",
+  padding: "9px 15px",
+  borderRadius: "7px",
+  border: "1px solid #733",
+  background: "transparent",
+  color: "#ff7777",
+  cursor: "pointer",
+};

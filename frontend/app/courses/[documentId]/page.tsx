@@ -29,6 +29,21 @@ type Enrollment = {
   } | null;
 };
 
+type ProgressItem = {
+  id: number;
+  documentId: string;
+  completed?: boolean;
+  completedAt?: string | null;
+  user?: {
+    id?: number;
+    documentId?: string;
+  } | null;
+  lesson?: {
+    id?: number;
+    documentId?: string;
+  } | null;
+};
+
 export default function CourseDetailsPage({
   params,
 }: {
@@ -147,7 +162,9 @@ export default function CourseDetailsPage({
         const lessons: Lesson[] =
           Array.isArray(rawLessons)
             ? rawLessons
-            : Array.isArray(rawLessons?.data)
+            : Array.isArray(
+                rawLessons?.data
+              )
             ? rawLessons.data.map(
                 (item: any) => ({
                   id: item.id,
@@ -282,14 +299,18 @@ export default function CourseDetailsPage({
         setProgressLoading(true);
 
         // ======================================
-        // 5. GET CURRENT USER'S COURSE PROGRESS
+        // 5. GET ALL PROGRESS
+        //
+        // We don't use the old:
+        // /my-progress?courseDocumentId=...
+        //
+        // because that endpoint was returning
+        // 400 Bad Request in your project.
         // ======================================
 
         const progressResponse =
           await fetch(
-            `http://localhost:1337/api/lesson-progresses/my-progress?courseDocumentId=${encodeURIComponent(
-              currentCourse.documentId
-            )}`,
+            "http://localhost:1337/api/lesson-progresses?populate=*",
             {
               method: "GET",
               headers: {
@@ -306,7 +327,7 @@ export default function CourseDetailsPage({
           await progressResponse.json();
 
         console.log(
-          "MY COURSE PROGRESS:",
+          "ALL PROGRESS RESPONSE:",
           progressResult
         );
 
@@ -314,25 +335,84 @@ export default function CourseDetailsPage({
           !progressResponse.ok
         ) {
           console.error(
-            "Progress API ERROR:",
+            "PROGRESS API ERROR:",
             progressResult
           );
 
           setCompletedLessons([]);
         } else {
-          const completed =
+          const allProgress: ProgressItem[] =
             Array.isArray(
               progressResult?.data
             )
               ? progressResult.data
               : [];
 
-          setCompletedLessons(
-            completed
-          );
+          const completed: string[] =
+            [];
+
+          // ====================================
+          // FIND CURRENT USER'S COMPLETED LESSONS
+          // ====================================
+
+          for (
+            const progress of allProgress
+          ) {
+            if (
+              progress?.completed !== true
+            ) {
+              continue;
+            }
+
+            const progressUserId =
+              progress?.user?.id;
+
+            // Only current logged-in user
+            if (
+              progressUserId &&
+              progressUserId !==
+                userResult?.id
+            ) {
+              continue;
+            }
+
+            const progressLessonId =
+              progress?.lesson
+                ?.documentId;
+
+            if (
+              !progressLessonId
+            ) {
+              continue;
+            }
+
+            // Make sure lesson belongs
+            // to current course
+            const belongsToCourse =
+              lessons.some(
+                (lesson) =>
+                  lesson.documentId ===
+                  progressLessonId
+              );
+
+            if (
+              belongsToCourse &&
+              !completed.includes(
+                progressLessonId
+              )
+            ) {
+              completed.push(
+                progressLessonId
+              );
+            }
+          }
 
           console.log(
             "COMPLETED LESSONS:",
+            completed
+          );
+
+          setCompletedLessons(
             completed
           );
         }
