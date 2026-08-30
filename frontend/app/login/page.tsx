@@ -1,5 +1,6 @@
 "use client";
 
+import { API_URL } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -29,7 +30,7 @@ export default function LoginPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:1337/api/auth/local",
+        `${API_URL}/api/auth/local`,
         {
           method: "POST",
           headers: {
@@ -82,7 +83,7 @@ export default function LoginPage() {
       try {
         const userResponse =
           await fetch(
-            "http://localhost:1337/api/users/me?populate=role",
+            `${API_URL}/api/users/me?populate=role`,
             {
               headers: {
                 Authorization:
