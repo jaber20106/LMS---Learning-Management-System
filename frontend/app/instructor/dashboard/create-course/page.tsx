@@ -8,29 +8,39 @@ export default function CreateCoursePage() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [description, setDescription] =
+    useState("");
+  const [loading, setLoading] =
+    useState(false);
+  const [message, setMessage] =
+    useState("");
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    const token = localStorage.getItem("lms_token");
+    const token =
+      localStorage.getItem("lms_token");
 
     if (!token) {
-      setMessage("Please login as an instructor first.");
+      setMessage(
+        "Please login as an instructor first."
+      );
       return;
     }
 
     if (!title.trim()) {
-      setMessage("Course title is required.");
+      setMessage(
+        "Course title is required."
+      );
       return;
     }
 
     if (!description.trim()) {
-      setMessage("Course description is required.");
+      setMessage(
+        "Course description is required."
+      );
       return;
     }
 
@@ -43,21 +53,28 @@ export default function CreateCoursePage() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${token}`,
           },
           body: JSON.stringify({
             data: {
               title: title.trim(),
-              description: description.trim(),
+              description:
+                description.trim(),
             },
           }),
         }
       );
 
-      const result = await response.json();
+      const result =
+        await response.json();
 
-      console.log("CREATE COURSE RESPONSE:", result);
+      console.log(
+        "CREATE COURSE RESPONSE:",
+        result
+      );
 
       if (!response.ok) {
         setMessage(
@@ -67,13 +84,17 @@ export default function CreateCoursePage() {
         return;
       }
 
-      setMessage("Course created successfully.");
+      setMessage(
+        "Course created successfully."
+      );
 
       setTitle("");
       setDescription("");
 
       setTimeout(() => {
-        router.push("/instructor/dashboard");
+        router.push(
+          "/instructor/dashboard"
+        );
         router.refresh();
       }, 700);
     } catch (error) {
@@ -91,76 +112,55 @@ export default function CreateCoursePage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "calc(100vh - 64px)",
-        padding: "60px 24px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "760px",
-          margin: "0 auto",
-        }}
-      >
+    <main className="min-h-screen bg-[#050505] px-4 py-8 text-[#f5f5f5] sm:px-8 sm:py-10 lg:px-12">
+
+      <div className="mx-auto max-w-3xl">
+
+        {/* Back */}
+
         <Link
           href="/instructor/dashboard"
-          style={{
-            color: "#aaa",
-            textDecoration: "none",
-            fontSize: "14px",
-          }}
+          className="group inline-flex items-center gap-2 text-sm text-[#777] transition hover:text-[#f15a24]"
         >
-          ← Back to Dashboard
+          <span className="transition-transform group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Back to Dashboard
         </Link>
 
-        <div style={{ marginTop: "35px" }}>
-          <p
-            style={{
-              color: "#888",
-              marginBottom: "8px",
-            }}
-          >
+        {/* Header */}
+
+        <div className="mt-8 border-b border-[#202020] pb-6">
+
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
             Instructor
           </p>
 
-          <h1
-            style={{
-              fontSize: "38px",
-              margin: 0,
-            }}
-          >
+          <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
             Create Course
           </h1>
 
-          <p
-            style={{
-              color: "#999",
-              marginTop: "10px",
-            }}
-          >
-            Create a new course for your students.
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[#777] sm:text-base">
+            Create a new course for your
+            students.
           </p>
+
         </div>
+
+        {/* Form */}
 
         <form
           onSubmit={handleSubmit}
-          style={{
-            marginTop: "35px",
-            border: "1px solid #333",
-            borderRadius: "12px",
-            padding: "28px",
-          }}
+          className="mt-6 rounded-2xl border border-[#292929] bg-[#0b0b0b] p-5 sm:p-7"
         >
+
           {/* Title */}
-          <div style={{ marginBottom: "24px" }}>
+
+          <div>
             <label
               htmlFor="title"
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "600",
-              }}
+              className="mb-2 block text-sm font-medium text-[#ddd]"
             >
               Course Title
             </label>
@@ -170,33 +170,23 @@ export default function CreateCoursePage() {
               type="text"
               value={title}
               onChange={(event) =>
-                setTitle(event.target.value)
+                setTitle(
+                  event.target.value
+                )
               }
               placeholder="e.g. Advanced React"
               disabled={loading}
               required
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "13px",
-                borderRadius: "8px",
-                border: "1px solid #444",
-                background: "#111",
-                color: "white",
-                fontSize: "15px",
-              }}
+              className="w-full rounded-xl border border-[#292929] bg-[#070707] px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#555] focus:border-[#f15a24]/60 focus:ring-1 focus:ring-[#f15a24]/20 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
           {/* Description */}
-          <div style={{ marginBottom: "24px" }}>
+
+          <div className="mt-6">
             <label
               htmlFor="description"
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "600",
-              }}
+              className="mb-2 block text-sm font-medium text-[#ddd]"
             >
               Course Description
             </label>
@@ -205,84 +195,51 @@ export default function CreateCoursePage() {
               id="description"
               value={description}
               onChange={(event) =>
-                setDescription(event.target.value)
+                setDescription(
+                  event.target.value
+                )
               }
               placeholder="Describe what students will learn..."
               disabled={loading}
               required
               rows={7}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "13px",
-                borderRadius: "8px",
-                border: "1px solid #444",
-                background: "#111",
-                color: "white",
-                fontSize: "15px",
-                resize: "vertical",
-                fontFamily: "inherit",
-              }}
+              className="w-full resize-y rounded-xl border border-[#292929] bg-[#070707] px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-[#555] focus:border-[#f15a24]/60 focus:ring-1 focus:ring-[#f15a24]/20 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
           {/* Message */}
+
           {message && (
-            <div
-              style={{
-                marginBottom: "20px",
-                padding: "12px 14px",
-                borderRadius: "8px",
-                border: "1px solid #333",
-                color: "#ccc",
-              }}
-            >
+            <div className="mt-5 rounded-xl border border-[#292929] bg-[#070707] px-4 py-3 text-sm leading-6 text-[#aaa]">
               {message}
             </div>
           )}
 
           {/* Actions */}
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              alignItems: "center",
-            }}
-          >
+
+          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+
+            <Link
+              href="/instructor/dashboard"
+              className="inline-flex items-center justify-center rounded-xl border border-[#292929] bg-[#070707] px-5 py-3 text-sm font-medium text-[#aaa] transition hover:border-[#f15a24]/40 hover:text-white"
+            >
+              Cancel
+            </Link>
+
             <button
               type="submit"
               disabled={loading}
-              style={{
-                padding: "12px 20px",
-                border: "none",
-                borderRadius: "8px",
-                background: "white",
-                color: "black",
-                fontWeight: "700",
-                cursor: loading
-                  ? "not-allowed"
-                  : "pointer",
-              }}
+              className="inline-flex items-center justify-center rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading
                 ? "Creating..."
                 : "Create Course"}
             </button>
 
-            <Link
-              href="/instructor/dashboard"
-              style={{
-                padding: "11px 18px",
-                border: "1px solid #444",
-                borderRadius: "8px",
-                color: "white",
-                textDecoration: "none",
-              }}
-            >
-              Cancel
-            </Link>
           </div>
+
         </form>
+
       </div>
     </main>
   );

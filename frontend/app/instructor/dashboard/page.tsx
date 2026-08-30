@@ -11,11 +11,8 @@ type Role = {
 
 type User = {
   id: number;
-  documentId?: string;
   username: string;
   email: string;
-  confirmed?: boolean;
-  blocked?: boolean;
   role?: Role | null;
 };
 
@@ -31,21 +28,28 @@ type CourseResponse = {
 };
 
 export default function InstructorDashboard() {
-  const [user, setUser] = useState<User | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [user, setUser] =
+    useState<User | null>(null);
+
+  const [courses, setCourses] =
+    useState<Course[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [deletingId, setDeletingId] =
+    useState<string | null>(null);
 
   useEffect(() => {
     loadDashboard();
   }, []);
 
   async function loadDashboard() {
-    const token = localStorage.getItem("lms_token");
-
-    console.log("========== INSTRUCTOR DASHBOARD ==========");
-    console.log("TOKEN EXISTS:", !!token);
+    const token =
+      localStorage.getItem("lms_token");
 
     if (!token) {
       setMessage("Please login first.");
@@ -54,28 +58,22 @@ export default function InstructorDashboard() {
     }
 
     try {
-      // -----------------------------------
-      // Get logged-in user
-      // -----------------------------------
+      const userResponse =
+        await fetch(
+          "http://localhost:1337/api/users/me?populate=*",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type":
+                "application/json",
+            },
+            cache: "no-store",
+          }
+        );
 
-      const userResponse = await fetch(
-        "http://localhost:1337/api/users/me?populate=*",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-        }
-      );
-
-      const userResult = await userResponse.json();
-
-      console.log("USER STATUS:", userResponse.status);
-      console.log("USER RESPONSE:", userResult);
-      console.log("USER ROLE:", userResult?.role);
-      console.log("USER ROLE NAME:", userResult?.role?.name);
+      const userResult =
+        await userResponse.json();
 
       if (!userResponse.ok) {
         setMessage(
@@ -88,37 +86,28 @@ export default function InstructorDashboard() {
 
       setUser(userResult);
 
-      // -----------------------------------
-      // Load courses
-      // -----------------------------------
+      const courseResponse =
+        await fetch(
+          "http://localhost:1337/api/courses?populate=lessons",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type":
+                "application/json",
+            },
+            cache: "no-store",
+          }
+        );
 
-      const courseResponse = await fetch(
-        "http://localhost:1337/api/courses?populate=lessons",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-        }
-      );
-
-      const courseResult: CourseResponse | {
-        error?: {
-          message?: string;
-        };
-      } = await courseResponse.json();
-
-      console.log(
-        "COURSE STATUS:",
-        courseResponse.status
-      );
-
-      console.log(
-        "COURSE RESPONSE:",
-        courseResult
-      );
+      const courseResult:
+        | CourseResponse
+        | {
+            error?: {
+              message?: string;
+            };
+          } =
+        await courseResponse.json();
 
       if (!courseResponse.ok) {
         setMessage(
@@ -127,18 +116,21 @@ export default function InstructorDashboard() {
                 "Failed to load courses."
             : "Failed to load courses."
         );
-
         setLoading(false);
         return;
       }
 
       if (!("data" in courseResult)) {
-        setMessage("Invalid course response.");
+        setMessage(
+          "Invalid course response."
+        );
         setLoading(false);
         return;
       }
 
-      setCourses(courseResult.data || []);
+      setCourses(
+        courseResult.data || []
+      );
     } catch (error) {
       console.error(
         "Instructor dashboard error:",
@@ -153,23 +145,21 @@ export default function InstructorDashboard() {
     }
   }
 
-  // -----------------------------------
-  // Delete Course
-  // -----------------------------------
-
   async function handleDeleteCourse(
     documentId: string,
     title: string
   ) {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${title}"?`
-    );
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to delete "${title}"?`
+      );
 
     if (!confirmed) {
       return;
     }
 
-    const token = localStorage.getItem("lms_token");
+    const token =
+      localStorage.getItem("lms_token");
 
     if (!token) {
       setMessage("Please login first.");
@@ -180,28 +170,22 @@ export default function InstructorDashboard() {
     setMessage("");
 
     try {
-      const response = await fetch(
-        `http://localhost:1337/api/courses/${documentId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response =
+        await fetch(
+          `http://localhost:1337/api/courses/${documentId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+              "Content-Type":
+                "application/json",
+            },
+          }
+        );
 
-      const result = await response.json();
-
-      console.log(
-        "DELETE COURSE STATUS:",
-        response.status
-      );
-
-      console.log(
-        "DELETE COURSE RESPONSE:",
-        result
-      );
+      const result =
+        await response.json();
 
       if (!response.ok) {
         setMessage(
@@ -211,12 +195,13 @@ export default function InstructorDashboard() {
         return;
       }
 
-      // Remove deleted course immediately
-      setCourses((currentCourses) =>
-        currentCourses.filter(
-          (course) =>
-            course.documentId !== documentId
-        )
+      setCourses(
+        (currentCourses) =>
+          currentCourses.filter(
+            (course) =>
+              course.documentId !==
+              documentId
+          )
       );
 
       setMessage(
@@ -236,454 +221,391 @@ export default function InstructorDashboard() {
     }
   }
 
-  // -----------------------------------
-  // Loading
-  // -----------------------------------
+  // ==========================================
+  // LOADING
+  // ==========================================
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "50px 30px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "0 auto",
-          }}
-        >
-          <p
-            style={{
-              color: "#999",
-            }}
-          >
-            Loading instructor dashboard...
-          </p>
+      <main className="min-h-screen bg-[#050505] px-4 py-8 text-white sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl animate-pulse">
+
+          <div className="h-4 w-28 rounded bg-[#151515]" />
+
+          <div className="mt-5 h-12 w-80 max-w-full rounded bg-[#151515]" />
+
+          <div className="mt-3 h-5 w-96 max-w-full rounded bg-[#111]" />
+
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="h-32 rounded-2xl bg-[#0b0b0b]" />
+            <div className="h-32 rounded-2xl bg-[#0b0b0b]" />
+            <div className="h-32 rounded-2xl bg-[#0b0b0b]" />
+          </div>
+
         </div>
       </main>
     );
   }
 
-  // -----------------------------------
-  // Dashboard
-  // -----------------------------------
-
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "50px 30px 80px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-        }}
-      >
-        {/* Header */}
+    <main className="min-h-screen bg-[#050505] px-4 py-7 pb-16 text-white sm:px-8 sm:py-10 lg:px-12">
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: "30px",
-            marginBottom: "45px",
-          }}
-        >
-          <div>
-            <p
-              style={{
-                margin: 0,
-                color: "#888",
-                fontSize: "14px",
-              }}
-            >
-              Instructor Dashboard
-            </p>
+      <div className="mx-auto max-w-7xl">
 
-            <h1
-              style={{
-                margin: "8px 0 0",
-                fontSize: "38px",
-                lineHeight: "1.2",
-              }}
-            >
-              Welcome, {user?.username || "Instructor"}
-            </h1>
+        {/* =====================================
+            HEADER
+        ===================================== */}
 
-            <p
-              style={{
-                marginTop: "12px",
-                color: "#aaa",
-                fontSize: "16px",
-              }}
-            >
-              Manage your courses and lessons from here.
-            </p>
+        <section className="relative overflow-hidden rounded-3xl border border-[#292929] bg-[#0b0b0b] p-6 sm:p-8 lg:p-10">
+
+          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#f15a24]/[0.06] blur-3xl" />
+
+          <div className="relative">
+
+            <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+
+              <div>
+
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#f15a24]/20 bg-[#f15a24]/[0.06] px-3 py-1.5">
+
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#f15a24]" />
+
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f15a24]">
+                    Instructor
+                  </span>
+
+                </div>
+
+                <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                  Welcome back,{" "}
+                  <span className="text-[#f15a24]">
+                    {user?.username ||
+                      "Instructor"}
+                  </span>
+                </h1>
+
+                <p className="mt-3 max-w-xl text-sm leading-6 text-[#777] sm:text-base">
+                  Manage your courses and
+                  teaching content from your
+                  dashboard.
+                </p>
+
+              </div>
+
+              {/* Header Actions */}
+
+              <div className="flex flex-wrap gap-2">
+
+                <Link
+                  href="/instructor/dashboard/create-course"
+                  className="inline-flex items-center justify-center rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f]"
+                >
+                  + Create Course
+                </Link>
+
+                {/* EXISTING MANAGE QUIZZES */}
+
+                <Link
+                  href="/instructor/dashboard/quizzes/manage"
+                  className="inline-flex items-center justify-center rounded-xl border border-[#303030] bg-[#080808] px-5 py-3 text-sm font-medium text-[#bbb] transition hover:border-[#f15a24]/40 hover:text-white"
+                >
+                  Manage Quizzes
+                </Link>
+
+              </div>
+
+            </div>
+
           </div>
+        </section>
 
-          <Link
-            href="/instructor/dashboard/create-course"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "12px 18px",
-              borderRadius: "8px",
-              background: "white",
-              color: "black",
-              textDecoration: "none",
-              fontWeight: "600",
-              whiteSpace: "nowrap",
-            }}
-          >
-            + Create Course
-          </Link>
-          <Link
-  href="/instructor/dashboard/quizzes"
-  style={{
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "12px 18px",
-    borderRadius: "8px",
-    border: "1px solid #444",
-    color: "white",
-    textDecoration: "none",
-    fontWeight: "600",
-    whiteSpace: "nowrap",
-  }}
->
-  Quizzes
-</Link>
-<Link
-  href="/instructor/dashboard/quizzes/manage"
-  style={{
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "12px 18px",
-    borderRadius: "8px",
-    border: "1px solid #444",
-    color: "white",
-    textDecoration: "none",
-    fontWeight: "600",
-    whiteSpace: "nowrap",
-  }}
->
-  Manage Quizzes
-</Link>
-        </div>
-
-        {/* Message */}
+        {/* =====================================
+            MESSAGE
+        ===================================== */}
 
         {message && (
-          <div
-            style={{
-              marginBottom: "30px",
-              padding: "16px 18px",
-              border: "1px solid #444",
-              borderRadius: "10px",
-              color: "#ddd",
-            }}
-          >
+          <div className="mt-5 rounded-xl border border-[#292929] bg-[#0b0b0b] px-4 py-3 text-sm text-[#aaa]">
             {message}
           </div>
         )}
 
-        {/* Stats */}
+        {/* =====================================
+            STATS
+        ===================================== */}
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "18px",
-            marginBottom: "45px",
-          }}
-        >
-          <div
-            style={{
-              border: "1px solid #333",
-              borderRadius: "12px",
-              padding: "22px",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: "#888",
-                fontSize: "14px",
-              }}
-            >
-              Total Courses
-            </p>
+        <section className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-            <h2
-              style={{
-                margin: "10px 0 0",
-                fontSize: "32px",
-              }}
-            >
+          <div className="rounded-2xl border border-[#292929] bg-[#0b0b0b] p-5 transition hover:border-[#f15a24]/30">
+
+            <div className="flex items-start justify-between">
+
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#666]">
+                Courses
+              </p>
+
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f15a24]/[0.08] text-[#f15a24]">
+                ◈
+              </span>
+
+            </div>
+
+            <p className="mt-5 text-3xl font-bold">
               {courses.length}
-            </h2>
-          </div>
-
-          <div
-            style={{
-              border: "1px solid #333",
-              borderRadius: "12px",
-              padding: "22px",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: "#888",
-                fontSize: "14px",
-              }}
-            >
-              Account
             </p>
 
-            <h2
-              style={{
-                margin: "10px 0 0",
-                fontSize: "22px",
-              }}
-            >
+            <p className="mt-1 text-xs text-[#666]">
+              Total courses
+            </p>
+
+          </div>
+
+          <div className="rounded-2xl border border-[#292929] bg-[#0b0b0b] p-5 transition hover:border-[#f15a24]/30">
+
+            <div className="flex items-start justify-between">
+
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#666]">
+                Role
+              </p>
+
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f15a24]/[0.08] text-[#f15a24]">
+                ✓
+              </span>
+
+            </div>
+
+            <p className="mt-5 text-xl font-bold">
               Instructor
-            </h2>
-          </div>
-
-          <div
-            style={{
-              border: "1px solid #333",
-              borderRadius: "12px",
-              padding: "22px",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: "#888",
-                fontSize: "14px",
-              }}
-            >
-              Email
             </p>
 
-            <p
-              style={{
-                margin: "10px 0 0",
-                fontSize: "15px",
-                wordBreak: "break-word",
-              }}
-            >
+            <p className="mt-1 text-xs text-[#666]">
+              Account type
+            </p>
+
+          </div>
+
+          <div className="rounded-2xl border border-[#292929] bg-[#0b0b0b] p-5 transition hover:border-[#f15a24]/30">
+
+            <div className="flex items-start justify-between">
+
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#666]">
+                Account
+              </p>
+
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f15a24]/[0.08] text-[#f15a24]">
+                @
+              </span>
+
+            </div>
+
+            <p className="mt-5 truncate text-sm font-medium text-[#ddd]">
               {user?.email || "—"}
             </p>
-          </div>
-        </div>
 
-        {/* Courses Section */}
-
-        <section>
-          <div
-            style={{
-              marginBottom: "22px",
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "26px",
-              }}
-            >
-              My Courses
-            </h2>
-
-            <p
-              style={{
-                marginTop: "8px",
-                color: "#888",
-              }}
-            >
-              Courses available in your account.
+            <p className="mt-1 text-xs text-[#666]">
+              Instructor email
             </p>
+
           </div>
+
+        </section>
+
+        {/* =====================================
+            MY COURSES
+        ===================================== */}
+
+        <section className="mt-12">
+
+          <div className="flex flex-col gap-3 border-b border-[#202020] pb-5 sm:flex-row sm:items-end sm:justify-between">
+
+            <div>
+
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+                Content
+              </p>
+
+              <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+                My Courses
+              </h2>
+
+              <p className="mt-1 text-sm text-[#666]">
+                Create, edit and manage your
+                courses.
+              </p>
+
+            </div>
+
+            <span className="text-sm text-[#555]">
+              {courses.length}{" "}
+              {courses.length === 1
+                ? "course"
+                : "courses"}
+            </span>
+
+          </div>
+
+          {/* ===================================
+              EMPTY
+          =================================== */}
 
           {courses.length === 0 ? (
-            <div
-              style={{
-                border: "1px dashed #444",
-                borderRadius: "12px",
-                padding: "55px 30px",
-                textAlign: "center",
-              }}
-            >
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: "20px",
-                }}
-              >
+            <div className="mt-6 rounded-2xl border border-dashed border-[#292929] bg-[#0b0b0b] px-5 py-16 text-center">
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#f15a24]/20 bg-[#f15a24]/[0.06] text-xl text-[#f15a24]">
+                +
+              </div>
+
+              <h3 className="mt-5 text-xl font-semibold">
                 No courses yet
               </h3>
 
-              <p
-                style={{
-                  marginTop: "10px",
-                  color: "#888",
-                }}
-              >
-                Create your first course to start teaching.
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#666]">
+                Create your first course to
+                start building your learning
+                content.
               </p>
 
               <Link
                 href="/instructor/dashboard/create-course"
-                style={{
-                  display: "inline-block",
-                  marginTop: "20px",
-                  padding: "11px 18px",
-                  borderRadius: "8px",
-                  background: "white",
-                  color: "black",
-                  textDecoration: "none",
-                  fontWeight: "600",
-                }}
+                className="mt-6 inline-flex rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f]"
               >
-                Create Your First Course
+                Create Course →
               </Link>
+
             </div>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: "20px",
-              }}
-            >
-              {courses.map((course) => (
-                <article
-                  key={course.documentId}
-                  style={{
-                    border: "1px solid #333",
-                    borderRadius: "12px",
-                    padding: "24px",
-                  }}
-                >
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "21px",
-                    }}
-                  >
-                    {course.title}
-                  </h3>
 
-                  <p
-                    style={{
-                      marginTop: "12px",
-                      color: "#aaa",
-                      lineHeight: "1.6",
-                    }}
-                  >
-                    {course.description}
-                  </p>
+            /* =================================
+               COURSE GRID
+            ================================= */
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      marginTop: "22px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <Link
-                      href={`/courses/${course.documentId}`}
-                      style={{
-                        padding: "10px 15px",
-                        border: "1px solid #444",
-                        borderRadius: "7px",
-                        color: "inherit",
-                        textDecoration: "none",
-                      }}
-                    >
-                      View
-                    </Link>
-                    <Link
-  href={`/instructor/dashboard/lessons/${course.documentId}`}
-  style={{
-    padding: "10px 15px",
-    border: "1px solid #444",
-    borderRadius: "7px",
-    color: "inherit",
-    textDecoration: "none",
-  }}
->
-  Lessons
-</Link>
+            <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
 
-                    <Link
-                      href={`/instructor/dashboard/edit/${course.documentId}`}
-                      style={{
-                        padding: "10px 15px",
-                        borderRadius: "7px",
-                        background: "white",
-                        color: "black",
-                        textDecoration: "none",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Edit
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleDeleteCourse(
-                          course.documentId,
-                          course.title
-                        )
-                      }
-                      disabled={
-                        deletingId ===
-                        course.documentId
-                      }
-                      style={{
-                        padding: "10px 15px",
-                        borderRadius: "7px",
-                        border: "1px solid #663333",
-                        background: "transparent",
-                        color: "#ff8a8a",
-                        cursor:
-                          deletingId ===
-                          course.documentId
-                            ? "not-allowed"
-                            : "pointer",
-                        opacity:
-                          deletingId ===
-                          course.documentId
-                            ? 0.6
-                            : 1,
-                      }}
-                    >
-                      {deletingId ===
+              {courses.map(
+                (course, index) => (
+                  <article
+                    key={
                       course.documentId
-                        ? "Deleting..."
-                        : "Delete"}
-                    </button>
-                  </div>
-                </article>
-              ))}
+                    }
+                    className="overflow-hidden rounded-2xl border border-[#292929] bg-[#0b0b0b] transition hover:border-[#f15a24]/35"
+                  >
+
+                    {/* Card Header */}
+
+                    <div className="flex items-center justify-between border-b border-[#202020] px-5 py-4">
+
+                      <div className="flex items-center gap-3">
+
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f15a24]/[0.07] text-xs font-semibold text-[#f15a24]">
+                          {String(
+                            index + 1
+                          ).padStart(
+                            2,
+                            "0"
+                          )}
+                        </span>
+
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#666]">
+                          Course
+                        </span>
+
+                      </div>
+
+                      <span className="rounded-full border border-green-500/20 bg-green-500/[0.05] px-2.5 py-1 text-[10px] text-green-400">
+                        Active
+                      </span>
+
+                    </div>
+
+                    {/* Card Content */}
+
+                    <div className="p-5 sm:p-6">
+
+                      <h3 className="text-xl font-semibold leading-7 text-[#f5f5f5]">
+                        {course.title}
+                      </h3>
+
+                      <p className="mt-3 line-clamp-2 min-h-12 text-sm leading-6 text-[#777]">
+                        {course.description ||
+                          "No description available."}
+                      </p>
+
+                      {/* =================================
+                          ACTIONS
+                      ================================= */}
+
+                      <div className="mt-6 flex flex-wrap gap-2 border-t border-[#202020] pt-5">
+
+                        {/* View */}
+
+                        <Link
+                          href={`/courses/${course.documentId}`}
+                          className="rounded-lg border border-[#292929] bg-[#070707] px-4 py-2.5 text-xs font-medium text-[#aaa] transition hover:border-[#f15a24]/40 hover:text-white"
+                        >
+                          View
+                        </Link>
+
+                        {/* Lessons */}
+
+                        <Link
+                          href={`/instructor/dashboard/lessons/${course.documentId}`}
+                          className="rounded-lg border border-[#292929] bg-[#070707] px-4 py-2.5 text-xs font-medium text-[#aaa] transition hover:border-[#f15a24]/40 hover:text-white"
+                        >
+                          Lessons
+                        </Link>
+
+                        {/* MANAGE QUIZZES */}
+
+                        <Link
+                          href="/instructor/dashboard/quizzes/manage"
+                          className="rounded-lg border border-[#292929] bg-[#070707] px-4 py-2.5 text-xs font-medium text-[#aaa] transition hover:border-[#f15a24]/40 hover:text-white"
+                        >
+                          Manage Quizzes
+                        </Link>
+
+                        {/* Edit */}
+
+                        <Link
+                          href={`/instructor/dashboard/edit/${course.documentId}`}
+                          className="rounded-lg bg-[#f15a24] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#d94b1f]"
+                        >
+                          Edit
+                        </Link>
+
+                        {/* Delete */}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteCourse(
+                              course.documentId,
+                              course.title
+                            )
+                          }
+                          disabled={
+                            deletingId ===
+                            course.documentId
+                          }
+                          className="rounded-lg border border-red-500/20 px-4 py-2.5 text-xs font-medium text-red-400 transition hover:bg-red-500/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {deletingId ===
+                          course.documentId
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  </article>
+                )
+              )}
+
             </div>
           )}
+
         </section>
+
       </div>
     </main>
   );

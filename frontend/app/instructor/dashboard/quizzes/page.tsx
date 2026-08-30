@@ -62,13 +62,16 @@ export default function CreateQuizPage() {
       return;
     }
 
-    if (role !== "instructor") {
-      setMessage(
-        "Only instructors can create quizzes."
-      );
-      setLoadingCourses(false);
-      return;
-    }
+    if (
+  role !== "instructor" &&
+  role !== "admin"
+) {
+  setMessage(
+    "Only instructors and admins can create quizzes."
+  );
+  setLoadingCourses(false);
+  return;
+}
 
     try {
       const response = await fetch(

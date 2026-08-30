@@ -33,9 +33,7 @@ export default function EditQuizPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const [questions, setQuestions] = useState<Question[]>(
-    []
-  );
+  const [questions, setQuestions] = useState<Question[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -74,8 +72,7 @@ export default function EditQuizPage() {
 
       if (!response.ok) {
         setMessage(
-          result?.error?.message ||
-            "Failed to load quiz."
+          result?.error?.message || "Failed to load quiz."
         );
         return;
       }
@@ -89,17 +86,10 @@ export default function EditQuizPage() {
 
       setQuiz(loadedQuiz);
       setTitle(loadedQuiz.title || "");
-      setDescription(
-        loadedQuiz.description || ""
-      );
-      setQuestions(
-        loadedQuiz.questions || []
-      );
+      setDescription(loadedQuiz.description || "");
+      setQuestions(loadedQuiz.questions || []);
     } catch (error) {
-      console.error(
-        "LOAD EDIT QUIZ ERROR:",
-        error
-      );
+      console.error("LOAD EDIT QUIZ ERROR:", error);
 
       setMessage(
         "Something went wrong while loading the quiz."
@@ -144,16 +134,13 @@ export default function EditQuizPage() {
     ]);
   }
 
-  async function removeQuestion(
-    index: number
-  ) {
+  async function removeQuestion(index: number) {
     const question = questions[index];
 
     if (!question.documentId) {
       setQuestions((current) =>
         current.filter(
-          (_, questionIndex) =>
-            questionIndex !== index
+          (_, questionIndex) => questionIndex !== index
         )
       );
 
@@ -187,10 +174,7 @@ export default function EditQuizPage() {
 
       const result = await response.json();
 
-      console.log(
-        "DELETE QUESTION:",
-        result
-      );
+      console.log("DELETE QUESTION:", result);
 
       if (!response.ok) {
         setMessage(
@@ -202,23 +186,15 @@ export default function EditQuizPage() {
 
       setQuestions((current) =>
         current.filter(
-          (_, questionIndex) =>
-            questionIndex !== index
+          (_, questionIndex) => questionIndex !== index
         )
       );
 
-      setMessage(
-        "Question deleted successfully."
-      );
+      setMessage("Question deleted successfully.");
     } catch (error) {
-      console.error(
-        "DELETE QUESTION ERROR:",
-        error
-      );
+      console.error("DELETE QUESTION ERROR:", error);
 
-      setMessage(
-        "Failed to delete question."
-      );
+      setMessage("Failed to delete question.");
     }
   }
 
@@ -310,8 +286,7 @@ export default function EditQuizPage() {
         }
       );
 
-      const quizResult =
-        await quizResponse.json();
+      const quizResult = await quizResponse.json();
 
       console.log(
         "UPDATE QUIZ RESPONSE:",
@@ -407,16 +382,11 @@ export default function EditQuizPage() {
         }
       }
 
-      setMessage(
-        "Quiz updated successfully."
-      );
+      setMessage("Quiz updated successfully.");
 
       await loadQuiz();
     } catch (error) {
-      console.error(
-        "SAVE QUIZ ERROR:",
-        error
-      );
+      console.error("SAVE QUIZ ERROR:", error);
 
       setMessage(
         "Something went wrong while saving."
@@ -426,400 +396,42 @@ export default function EditQuizPage() {
     }
   }
 
+  // ==========================================
+  // LOADING
+  // ==========================================
+
   if (loading) {
     return (
-      <main style={pageStyle}>
-        <div style={containerStyle}>
-          <p style={mutedStyle}>
-            Loading quiz...
-          </p>
+      <main className="min-h-screen bg-[#050505] px-4 py-8 text-white sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-4xl animate-pulse">
+
+          <div className="h-4 w-36 rounded bg-white/[0.06]" />
+
+          <div className="mt-7 h-10 w-60 max-w-full rounded bg-white/[0.06]" />
+
+          <div className="mt-3 h-4 w-96 max-w-full rounded bg-white/[0.04]" />
+
+          <div className="mt-8 h-64 rounded-2xl bg-white/[0.04]" />
+
         </div>
       </main>
     );
   }
+
+  // ==========================================
+  // QUIZ NOT FOUND
+  // ==========================================
 
   if (!quiz) {
     return (
-      <main style={pageStyle}>
-        <div style={containerStyle}>
-          <div style={messageStyle}>
-            {message || "Quiz not found."}
-          </div>
+      <main className="min-h-screen bg-[#050505] px-4 py-8 text-white sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-4xl">
 
-          <button
-            type="button"
-            onClick={() =>
-              router.push(
-                "/instructor/dashboard/quizzes/manage"
-              )
-            }
-            style={secondaryButtonStyle}
-          >
-            ← Back to Quizzes
-          </button>
-        </div>
-      </main>
-    );
-  }
+          <div className="rounded-2xl border border-[#292929] bg-[#0b0b0b] p-6 sm:p-8">
 
-  return (
-    <main style={pageStyle}>
-      <div style={containerStyle}>
-        <button
-          type="button"
-          onClick={() =>
-            router.push(
-              "/instructor/dashboard/quizzes/manage"
-            )
-          }
-          style={backButtonStyle}
-        >
-          ← Back to Manage Quizzes
-        </button>
-
-        <div style={headerStyle}>
-          <p style={eyebrowStyle}>
-            Instructor
-          </p>
-
-          <h1 style={titleStyle}>
-            Edit Quiz
-          </h1>
-
-          <p style={descriptionStyle}>
-            Update quiz information and questions.
-          </p>
-        </div>
-
-        <form onSubmit={handleSave}>
-          {/* QUIZ INFORMATION */}
-
-          <section style={cardStyle}>
-            <h2 style={sectionTitleStyle}>
-              Quiz Information
-            </h2>
-
-            <div style={fieldStyle}>
-              <label style={labelStyle}>
-                Quiz Title
-              </label>
-
-              <input
-                value={title}
-                onChange={(event) =>
-                  setTitle(event.target.value)
-                }
-                disabled={saving}
-                style={inputStyle}
-              />
+            <div className="rounded-xl border border-red-500/20 bg-red-500/[0.04] px-4 py-3 text-sm text-red-300">
+              {message || "Quiz not found."}
             </div>
-
-            <div style={fieldStyle}>
-              <label style={labelStyle}>
-                Description
-              </label>
-
-              <textarea
-                value={description}
-                onChange={(event) =>
-                  setDescription(
-                    event.target.value
-                  )
-                }
-                disabled={saving}
-                rows={5}
-                style={{
-                  ...inputStyle,
-                  resize: "vertical" as const,
-                  fontFamily: "inherit",
-                }}
-              />
-            </div>
-          </section>
-
-          {/* QUESTIONS */}
-
-          <section
-            style={{
-              marginTop: "25px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: "15px",
-                marginBottom: "18px",
-              }}
-            >
-              <div>
-                <h2 style={sectionTitleStyle}>
-                  Questions ({questions.length})
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                onClick={addQuestion}
-                disabled={saving}
-                style={addButtonStyle}
-              >
-                + Add Question
-              </button>
-            </div>
-
-            {questions.length === 0 ? (
-              <div style={emptyStyle}>
-                No questions yet. Click{" "}
-                <strong>
-                  Add Question
-                </strong>{" "}
-                to create one.
-              </div>
-            ) : (
-              questions.map(
-                (question, index) => (
-                  <div
-                    key={
-                      question.documentId ||
-                      `new-${index}`
-                    }
-                    style={cardStyle}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        alignItems: "center",
-                        gap: "15px",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: "20px",
-                        }}
-                      >
-                        Question {index + 1}
-                      </h3>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeQuestion(
-                            index
-                          )
-                        }
-                        disabled={saving}
-                        style={
-                          deleteButtonStyle
-                        }
-                      >
-                        Delete
-                      </button>
-                    </div>
-
-                    <div style={fieldStyle}>
-                      <label style={labelStyle}>
-                        Question
-                      </label>
-
-                      <textarea
-                        value={
-                          question.question
-                        }
-                        onChange={(event) =>
-                          updateQuestion(
-                            index,
-                            "question",
-                            event.target.value
-                          )
-                        }
-                        disabled={saving}
-                        rows={4}
-                        style={{
-                          ...inputStyle,
-                          resize:
-                            "vertical" as const,
-                          fontFamily:
-                            "inherit",
-                        }}
-                      />
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns:
-                          "1fr 1fr",
-                        gap: "15px",
-                      }}
-                    >
-                      <div style={fieldStyle}>
-                        <label
-                          style={labelStyle}
-                        >
-                          Option A
-                        </label>
-
-                        <input
-                          value={
-                            question.optionA
-                          }
-                          onChange={(event) =>
-                            updateQuestion(
-                              index,
-                              "optionA",
-                              event.target
-                                .value
-                            )
-                          }
-                          disabled={saving}
-                          style={inputStyle}
-                        />
-                      </div>
-
-                      <div style={fieldStyle}>
-                        <label
-                          style={labelStyle}
-                        >
-                          Option B
-                        </label>
-
-                        <input
-                          value={
-                            question.optionB
-                          }
-                          onChange={(event) =>
-                            updateQuestion(
-                              index,
-                              "optionB",
-                              event.target
-                                .value
-                            )
-                          }
-                          disabled={saving}
-                          style={inputStyle}
-                        />
-                      </div>
-
-                      <div style={fieldStyle}>
-                        <label
-                          style={labelStyle}
-                        >
-                          Option C
-                        </label>
-
-                        <input
-                          value={
-                            question.optionC
-                          }
-                          onChange={(event) =>
-                            updateQuestion(
-                              index,
-                              "optionC",
-                              event.target
-                                .value
-                            )
-                          }
-                          disabled={saving}
-                          style={inputStyle}
-                        />
-                      </div>
-
-                      <div style={fieldStyle}>
-                        <label
-                          style={labelStyle}
-                        >
-                          Option D
-                        </label>
-
-                        <input
-                          value={
-                            question.optionD
-                          }
-                          onChange={(event) =>
-                            updateQuestion(
-                              index,
-                              "optionD",
-                              event.target
-                                .value
-                            )
-                          }
-                          disabled={saving}
-                          style={inputStyle}
-                        />
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: "5px",
-                      }}
-                    >
-                      <label style={labelStyle}>
-                        Correct Answer
-                      </label>
-
-                      <select
-                        value={
-                          question.correctAnswer
-                        }
-                        onChange={(event) =>
-                          updateQuestion(
-                            index,
-                            "correctAnswer",
-                            event.target.value
-                          )
-                        }
-                        disabled={saving}
-                        style={inputStyle}
-                      >
-                        <option value="A">
-                          Option A
-                        </option>
-                        <option value="B">
-                          Option B
-                        </option>
-                        <option value="C">
-                          Option C
-                        </option>
-                        <option value="D">
-                          Option D
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                )
-              )
-            )}
-          </section>
-
-          {message && (
-            <div style={messageStyle}>
-              {message}
-            </div>
-          )}
-
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              marginTop: "25px",
-            }}
-          >
-            <button
-              type="submit"
-              disabled={saving}
-              style={saveButtonStyle}
-            >
-              {saving
-                ? "Saving..."
-                : "Save Changes"}
-            </button>
 
             <button
               type="button"
@@ -828,143 +440,464 @@ export default function EditQuizPage() {
                   "/instructor/dashboard/quizzes/manage"
                 )
               }
-              style={secondaryButtonStyle}
+              className="mt-5 rounded-lg border border-[#303030] px-4 py-2.5 text-sm text-[#aaa] transition hover:border-[#f15a24]/40 hover:text-white"
+            >
+              ← Back to Quizzes
+            </button>
+
+          </div>
+
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#050505] px-4 py-7 pb-20 text-white sm:px-8 sm:py-10 lg:px-12">
+
+      <div className="mx-auto max-w-4xl">
+
+        {/* =====================================
+            BACK
+        ===================================== */}
+
+        <button
+          type="button"
+          onClick={() =>
+            router.push(
+              "/instructor/dashboard/quizzes/manage"
+            )
+          }
+          className="group inline-flex items-center gap-2 text-sm text-[#777] transition hover:text-[#f15a24]"
+        >
+          <span className="transition-transform group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Back to Manage Quizzes
+        </button>
+
+        {/* =====================================
+            HEADER
+        ===================================== */}
+
+        <header className="mt-7">
+
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#f15a24]/20 bg-[#f15a24]/[0.06] px-3 py-1.5">
+
+            <span className="h-1.5 w-1.5 rounded-full bg-[#f15a24]" />
+
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f15a24]">
+              Instructor
+            </span>
+
+          </div>
+
+          <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+            Edit Quiz
+          </h1>
+
+          <p className="mt-2 text-sm leading-6 text-[#777] sm:text-base">
+            Update quiz information and manage
+            its questions.
+          </p>
+
+        </header>
+
+        <form
+          onSubmit={handleSave}
+          className="mt-8"
+        >
+
+          {/* ===================================
+              QUIZ INFORMATION
+          =================================== */}
+
+          <section className="rounded-2xl border border-[#292929] bg-[#0b0b0b] p-5 sm:p-7">
+
+            <div className="border-b border-[#202020] pb-5">
+
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f15a24]">
+                Details
+              </p>
+
+              <h2 className="mt-1 text-xl font-semibold">
+                Quiz Information
+              </h2>
+
+            </div>
+
+            <div className="mt-6 space-y-5">
+
+              {/* Title */}
+
+              <div>
+
+                <label
+                  htmlFor="quiz-title"
+                  className="mb-2 block text-sm font-medium text-[#ddd]"
+                >
+                  Quiz Title
+                </label>
+
+                <input
+                  id="quiz-title"
+                  value={title}
+                  onChange={(event) =>
+                    setTitle(event.target.value)
+                  }
+                  disabled={saving}
+                  className="w-full rounded-xl border border-[#303030] bg-[#070707] px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#555] focus:border-[#f15a24]/50 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+
+              </div>
+
+              {/* Description */}
+
+              <div>
+
+                <label
+                  htmlFor="quiz-description"
+                  className="mb-2 block text-sm font-medium text-[#ddd]"
+                >
+                  Description
+                </label>
+
+                <textarea
+                  id="quiz-description"
+                  value={description}
+                  onChange={(event) =>
+                    setDescription(
+                      event.target.value
+                    )
+                  }
+                  disabled={saving}
+                  rows={4}
+                  className="w-full resize-y rounded-xl border border-[#303030] bg-[#070707] px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-[#555] focus:border-[#f15a24]/50 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+
+              </div>
+
+            </div>
+
+          </section>
+
+          {/* ===================================
+              QUESTIONS
+          =================================== */}
+
+          <section className="mt-7">
+
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+
+              <div>
+
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f15a24]">
+                  Assessment
+                </p>
+
+                <h2 className="mt-1 text-xl font-semibold">
+                  Questions
+                  <span className="ml-2 text-sm font-normal text-[#555]">
+                    ({questions.length})
+                  </span>
+                </h2>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={addQuestion}
+                disabled={saving}
+                className="inline-flex w-full items-center justify-center rounded-xl border border-[#303030] bg-[#0b0b0b] px-4 py-3 text-sm font-medium text-[#ccc] transition hover:border-[#f15a24]/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              >
+                + Add Question
+              </button>
+
+            </div>
+
+            {questions.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-[#292929] bg-[#0b0b0b] px-5 py-14 text-center">
+
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-[#f15a24]/20 bg-[#f15a24]/[0.06] text-[#f15a24]">
+                  ?
+                </div>
+
+                <h3 className="mt-4 text-lg font-semibold">
+                  No questions yet
+                </h3>
+
+                <p className="mt-2 text-sm text-[#666]">
+                  Add a question to start
+                  building this quiz.
+                </p>
+
+              </div>
+            ) : (
+              <div className="space-y-5">
+
+                {questions.map(
+                  (question, index) => (
+                    <article
+                      key={
+                        question.documentId ||
+                        `new-${index}`
+                      }
+                      className="rounded-2xl border border-[#292929] bg-[#0b0b0b] p-5 sm:p-7"
+                    >
+
+                      {/* Question Header */}
+
+                      <div className="flex items-center justify-between gap-4 border-b border-[#202020] pb-5">
+
+                        <div className="flex items-center gap-3">
+
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f15a24]/[0.08] text-xs font-semibold text-[#f15a24]">
+                            {String(
+                              index + 1
+                            ).padStart(
+                              2,
+                              "0"
+                            )}
+                          </span>
+
+                          <div>
+
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#666]">
+                              Question
+                            </p>
+
+                            <h3 className="mt-0.5 text-base font-semibold">
+                              Question{" "}
+                              {index + 1}
+                            </h3>
+
+                          </div>
+
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeQuestion(
+                              index
+                            )
+                          }
+                          disabled={saving}
+                          className="shrink-0 rounded-lg border border-red-500/20 px-3 py-2 text-xs font-medium text-red-400 transition hover:bg-red-500/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+
+                      {/* Question Text */}
+
+                      <div className="mt-6">
+
+                        <label
+                          htmlFor={`question-${index}`}
+                          className="mb-2 block text-sm font-medium text-[#ddd]"
+                        >
+                          Question Text
+                        </label>
+
+                        <textarea
+                          id={`question-${index}`}
+                          value={
+                            question.question
+                          }
+                          onChange={(event) =>
+                            updateQuestion(
+                              index,
+                              "question",
+                              event.target.value
+                            )
+                          }
+                          disabled={saving}
+                          rows={4}
+                          placeholder="Write your question..."
+                          className="w-full resize-y rounded-xl border border-[#303030] bg-[#070707] px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-[#555] focus:border-[#f15a24]/50 disabled:cursor-not-allowed disabled:opacity-60"
+                        />
+
+                      </div>
+
+                      {/* Options */}
+
+                      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                        {(
+                          [
+                            [
+                              "A",
+                              "optionA",
+                            ],
+                            [
+                              "B",
+                              "optionB",
+                            ],
+                            [
+                              "C",
+                              "optionC",
+                            ],
+                            [
+                              "D",
+                              "optionD",
+                            ],
+                          ] as const
+                        ).map(
+                          ([
+                            option,
+                            field,
+                          ]) => (
+                            <div
+                              key={option}
+                            >
+
+                              <label
+                                htmlFor={`question-${index}-option-${option}`}
+                                className="mb-2 flex items-center gap-2 text-sm font-medium text-[#ddd]"
+                              >
+
+                                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#151515] text-[10px] text-[#aaa]">
+                                  {option}
+                                </span>
+
+                                Option{" "}
+                                {option}
+
+                              </label>
+
+                              <input
+                                id={`question-${index}-option-${option}`}
+                                value={
+                                  question[
+                                    field
+                                  ]
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateQuestion(
+                                    index,
+                                    field,
+                                    event
+                                      .target
+                                      .value
+                                  )
+                                }
+                                disabled={
+                                  saving
+                                }
+                                placeholder={`Option ${option}`}
+                                className="w-full rounded-xl border border-[#303030] bg-[#070707] px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#555] focus:border-[#f15a24]/50 disabled:cursor-not-allowed disabled:opacity-60"
+                              />
+
+                            </div>
+                          )
+                        )}
+
+                      </div>
+
+                      {/* Correct Answer */}
+
+                      <div className="mt-5">
+
+                        <label
+                          htmlFor={`correct-answer-${index}`}
+                          className="mb-2 block text-sm font-medium text-[#ddd]"
+                        >
+                          Correct Answer
+                        </label>
+
+                        <select
+                          id={`correct-answer-${index}`}
+                          value={
+                            question.correctAnswer
+                          }
+                          onChange={(event) =>
+                            updateQuestion(
+                              index,
+                              "correctAnswer",
+                              event.target.value
+                            )
+                          }
+                          disabled={saving}
+                          className="w-full rounded-xl border border-[#303030] bg-[#070707] px-4 py-3 text-sm text-white outline-none transition focus:border-[#f15a24]/50 disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-xs"
+                        >
+                          <option value="A">
+                            Option A
+                          </option>
+
+                          <option value="B">
+                            Option B
+                          </option>
+
+                          <option value="C">
+                            Option C
+                          </option>
+
+                          <option value="D">
+                            Option D
+                          </option>
+                        </select>
+
+                      </div>
+
+                    </article>
+                  )
+                )}
+
+              </div>
+            )}
+
+          </section>
+
+          {/* ===================================
+              MESSAGE
+          =================================== */}
+
+          {message && (
+            <div className="mt-6 rounded-xl border border-[#292929] bg-[#0b0b0b] px-4 py-3 text-sm text-[#aaa]">
+              {message}
+            </div>
+          )}
+
+          {/* ===================================
+              ACTIONS
+          =================================== */}
+
+          <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/instructor/dashboard/quizzes/manage"
+                )
+              }
+              disabled={saving}
+              className="w-full rounded-xl border border-[#303030] bg-transparent px-5 py-3 text-sm font-medium text-[#aaa] transition hover:border-[#444] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               Cancel
             </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
+            </button>
+
           </div>
+
         </form>
+
       </div>
+
     </main>
   );
 }
-
-const pageStyle = {
-  minHeight: "100vh",
-  padding: "55px 25px 100px",
-};
-
-const containerStyle = {
-  maxWidth: "950px",
-  margin: "0 auto",
-};
-
-const backButtonStyle = {
-  border: "none",
-  background: "transparent",
-  color: "#aaa",
-  padding: 0,
-  cursor: "pointer",
-  fontSize: "14px",
-};
-
-const headerStyle = {
-  marginTop: "30px",
-  marginBottom: "30px",
-};
-
-const eyebrowStyle = {
-  color: "#888",
-  margin: 0,
-};
-
-const titleStyle = {
-  fontSize: "38px",
-  margin: "8px 0",
-};
-
-const descriptionStyle = {
-  color: "#999",
-  margin: 0,
-};
-
-const cardStyle = {
-  border: "1px solid #333",
-  borderRadius: "12px",
-  padding: "25px",
-  background: "#111",
-  marginBottom: "20px",
-};
-
-const sectionTitleStyle = {
-  marginTop: 0,
-  marginBottom: "20px",
-  fontSize: "23px",
-};
-
-const fieldStyle = {
-  marginBottom: "20px",
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "8px",
-  fontWeight: "600",
-};
-
-const inputStyle = {
-  width: "100%",
-  boxSizing: "border-box" as const,
-  padding: "13px",
-  borderRadius: "8px",
-  border: "1px solid #444",
-  background: "#111",
-  color: "white",
-  fontSize: "15px",
-};
-
-const addButtonStyle = {
-  padding: "10px 15px",
-  borderRadius: "8px",
-  border: "1px solid #444",
-  background: "transparent",
-  color: "white",
-  cursor: "pointer",
-};
-
-const deleteButtonStyle = {
-  padding: "8px 12px",
-  borderRadius: "7px",
-  border: "1px solid #633",
-  background: "transparent",
-  color: "#ff7777",
-  cursor: "pointer",
-};
-
-const saveButtonStyle = {
-  padding: "13px 20px",
-  border: "none",
-  borderRadius: "8px",
-  background: "white",
-  color: "black",
-  fontWeight: "700",
-  cursor: "pointer",
-};
-
-const secondaryButtonStyle = {
-  padding: "12px 18px",
-  border: "1px solid #444",
-  borderRadius: "8px",
-  background: "transparent",
-  color: "white",
-  cursor: "pointer",
-};
-
-const messageStyle = {
-  marginTop: "20px",
-  padding: "13px 15px",
-  border: "1px solid #444",
-  borderRadius: "8px",
-  color: "#ccc",
-};
-
-const emptyStyle = {
-  border: "1px dashed #444",
-  borderRadius: "10px",
-  padding: "30px",
-  color: "#888",
-};
-
-const mutedStyle = {
-  color: "#999",
-};

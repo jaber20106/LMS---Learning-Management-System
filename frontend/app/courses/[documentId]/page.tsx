@@ -300,12 +300,6 @@ export default function CourseDetailsPage({
 
         // ======================================
         // 5. GET ALL PROGRESS
-        //
-        // We don't use the old:
-        // /my-progress?courseDocumentId=...
-        //
-        // because that endpoint was returning
-        // 400 Bad Request in your project.
         // ======================================
 
         const progressResponse =
@@ -351,10 +345,6 @@ export default function CourseDetailsPage({
           const completed: string[] =
             [];
 
-          // ====================================
-          // FIND CURRENT USER'S COMPLETED LESSONS
-          // ====================================
-
           for (
             const progress of allProgress
           ) {
@@ -367,7 +357,6 @@ export default function CourseDetailsPage({
             const progressUserId =
               progress?.user?.id;
 
-            // Only current logged-in user
             if (
               progressUserId &&
               progressUserId !==
@@ -386,8 +375,6 @@ export default function CourseDetailsPage({
               continue;
             }
 
-            // Make sure lesson belongs
-            // to current course
             const belongsToCourse =
               lessons.some(
                 (lesson) =>
@@ -448,21 +435,14 @@ export default function CourseDetailsPage({
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "60px 30px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1000px",
-            margin: "0 auto",
-          }}
-        >
-          <p style={{ color: "#999" }}>
-            Loading course...
-          </p>
+      <main className="min-h-screen bg-[#050505] px-4 py-12 text-[#f5f5f5] sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="animate-pulse">
+            <div className="h-4 w-24 rounded bg-white/[0.06]" />
+            <div className="mt-10 h-12 w-2/3 rounded bg-white/[0.06]" />
+            <div className="mt-4 h-5 w-1/2 rounded bg-white/[0.04]" />
+            <div className="mt-10 h-32 rounded-2xl bg-white/[0.04]" />
+          </div>
         </div>
       </main>
     );
@@ -474,28 +454,18 @@ export default function CourseDetailsPage({
 
   if (message) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "60px 30px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "800px",
-            margin: "0 auto",
-          }}
-        >
-          <h1>Course</h1>
+      <main className="min-h-screen bg-[#050505] px-4 py-12 text-[#f5f5f5] sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-4xl">
 
-          <div
-            style={{
-              marginTop: "25px",
-              padding: "18px",
-              border: "1px solid #444",
-              borderRadius: "10px",
-            }}
-          >
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#f15a24]">
+            Course
+          </p>
+
+          <h1 className="mt-3 text-4xl font-bold">
+            Something went wrong
+          </h1>
+
+          <div className="mt-7 rounded-2xl border border-[#292929] bg-[#0b0b0b] p-5 text-sm text-[#999]">
             {message}
           </div>
 
@@ -504,15 +474,7 @@ export default function CourseDetailsPage({
             onClick={() =>
               router.back()
             }
-            style={{
-              marginTop: "20px",
-              padding: "10px 18px",
-              border: "1px solid #444",
-              borderRadius: "7px",
-              background: "transparent",
-              color: "white",
-              cursor: "pointer",
-            }}
+            className="mt-5 rounded-xl border border-[#292929] bg-[#0b0b0b] px-5 py-3 text-sm font-semibold text-[#f5f5f5] transition hover:border-[#f15a24]/40 hover:bg-[#f15a24]/[0.06]"
           >
             ← Back
           </button>
@@ -523,13 +485,10 @@ export default function CourseDetailsPage({
 
   if (!course) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "60px 30px",
-        }}
-      >
-        <h1>Course not found</h1>
+      <main className="min-h-screen bg-[#050505] px-4 py-12 text-[#f5f5f5]">
+        <h1 className="text-3xl font-bold">
+          Course not found
+        </h1>
       </main>
     );
   }
@@ -561,68 +520,92 @@ export default function CourseDetailsPage({
   // ==========================================
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "60px 30px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-        }}
-      >
-        {/* BACK */}
+    <main className="min-h-screen overflow-hidden bg-[#050505] px-4 py-8 text-[#f5f5f5] sm:px-8 sm:py-10 lg:px-12">
 
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute left-1/2 top-[-220px] h-[500px] w-[750px] -translate-x-1/2 rounded-full bg-[#f15a24]/[0.045] blur-[140px]" />
+
+        <div className="absolute bottom-[-250px] right-[-200px] h-[450px] w-[450px] rounded-full bg-[#f15a24]/[0.02] blur-[120px]" />
+      </div>
+
+      <div className="mx-auto max-w-6xl">
+
+        {/* Back */}
         <button
           type="button"
           onClick={() =>
             router.back()
           }
-          style={{
-            border: "none",
-            background: "transparent",
-            color: "#aaa",
-            padding: 0,
-            cursor: "pointer",
-            marginBottom: "25px",
-          }}
+          className="group inline-flex items-center gap-2 text-sm text-[#777] transition hover:text-[#f15a24]"
         >
-          ← Back
+          <span className="transition-transform group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Back
         </button>
 
         {/* COURSE HEADER */}
 
-        <div
-          style={{
-            border: "1px solid #333",
-            borderRadius: "12px",
-            padding: "28px",
-          }}
-        >
-          <p
-            style={{
-              color: "#888",
-              marginBottom: "10px",
-            }}
-          >
-            {isInstructor
-              ? "Instructor Course"
-              : "Course"}
-          </p>
+        <div className="mt-7 overflow-hidden rounded-2xl border border-[#292929] bg-[#0b0b0b]">
 
-          <h1>{course.title}</h1>
+          {/* Header accent */}
 
-          <p
-            style={{
-              marginTop: "15px",
-              color: "#aaa",
-              lineHeight: "1.7",
-            }}
-          >
-            {course.description}
-          </p>
+          <div className="h-1 w-full bg-[#f15a24]" />
+
+          <div className="p-6 sm:p-8 lg:p-10">
+
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full border border-[#f15a24]/20 bg-[#f15a24]/[0.07] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+                {isInstructor
+                  ? "Instructor Course"
+                  : "Course"}
+              </span>
+
+              {enrolled && !isInstructor && (
+                <span className="rounded-full border border-green-500/20 bg-green-500/[0.06] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-green-400">
+                  Enrolled
+                </span>
+              )}
+            </div>
+
+            <h1 className="mt-5 max-w-4xl text-3xl font-bold tracking-[-0.03em] text-[#f5f5f5] sm:text-4xl lg:text-5xl">
+              {course.title}
+            </h1>
+
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-[#888] sm:text-base">
+              {course.description}
+            </p>
+
+            {/* Course info */}
+
+            <div className="mt-7 flex flex-wrap gap-3">
+
+              <div className="rounded-xl border border-[#292929] bg-[#050505] px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#666]">
+                  Lessons
+                </p>
+
+                <p className="mt-1 text-lg font-semibold text-[#f5f5f5]">
+                  {totalLessons}
+                </p>
+              </div>
+
+              {enrolled && !isInstructor && (
+                <div className="rounded-xl border border-[#292929] bg-[#050505] px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-[#666]">
+                    Progress
+                  </p>
+
+                  <p className="mt-1 text-lg font-semibold text-[#f15a24]">
+                    {progressPercentage}%
+                  </p>
+                </div>
+              )}
+
+            </div>
+          </div>
         </div>
 
         {/* NOT ENROLLED */}
@@ -630,37 +613,30 @@ export default function CourseDetailsPage({
         {!isInstructor &&
           !enrollmentLoading &&
           !enrolled && (
-            <div
-              style={{
-                marginTop: "30px",
-                padding: "25px",
-                border: "1px solid #444",
-                borderRadius: "12px",
-              }}
-            >
-              <h2>
-                Enroll to access lessons
-              </h2>
+            <div className="mt-5 rounded-2xl border border-[#f15a24]/20 bg-[#f15a24]/[0.035] p-6 sm:p-7">
 
-              <p
-                style={{
-                  marginTop: "10px",
-                  color: "#999",
-                  lineHeight: "1.6",
-                }}
-              >
-                You can view the course
-                information, but you must
-                enroll before accessing
-                lessons and tracking
-                progress.
-              </p>
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
-              <EnrollButton
-                courseDocumentId={
-                  course.documentId
-                }
-              />
+                <div>
+                  <h2 className="text-xl font-semibold text-[#f5f5f5]">
+                    Start this course
+                  </h2>
+
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-[#888]">
+                    Enroll in this course to access
+                    lessons and track your progress.
+                  </p>
+                </div>
+
+                <div className="shrink-0">
+                  <EnrollButton
+                    courseDocumentId={
+                      course.documentId
+                    }
+                  />
+                </div>
+
+              </div>
             </div>
           )}
 
@@ -668,67 +644,47 @@ export default function CourseDetailsPage({
 
         {!isInstructor &&
           enrolled && (
-            <div
-              style={{
-                marginTop: "30px",
-                padding: "22px",
-                border: "1px solid #333",
-                borderRadius: "12px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent:
-                    "space-between",
-                  alignItems: "center",
-                  marginBottom: "12px",
-                }}
-              >
-                <strong>
-                  Course Progress
-                </strong>
+            <div className="mt-5 rounded-2xl border border-[#292929] bg-[#0b0b0b] p-6 sm:p-7">
 
-                <span
-                  style={{
-                    color: "#aaa",
-                  }}
-                >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+                    Your progress
+                  </p>
+
+                  <h2 className="mt-1 text-lg font-semibold">
+                    Course Progress
+                  </h2>
+                </div>
+
+                <span className="text-sm text-[#888]">
                   {completedCount} /{" "}
                   {totalLessons} lessons
                 </span>
               </div>
 
-              <div
-                style={{
-                  width: "100%",
-                  height: "10px",
-                  background: "#333",
-                  borderRadius: "10px",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#242424]">
                 <div
+                  className="h-full rounded-full bg-[#f15a24] transition-all duration-500"
                   style={{
                     width: `${progressPercentage}%`,
-                    height: "100%",
-                    background: "#22c55e",
-                    transition:
-                      "width 0.3s ease",
                   }}
                 />
               </div>
 
-              <p
-                style={{
-                  marginTop: "10px",
-                  color: "#aaa",
-                }}
-              >
-                {progressLoading
-                  ? "Loading progress..."
-                  : `${progressPercentage}% complete`}
-              </p>
+              <div className="mt-3 flex items-center justify-between">
+                <p className="text-xs text-[#666]">
+                  {progressLoading
+                    ? "Loading progress..."
+                    : `${progressPercentage}% complete`}
+                </p>
+
+                {progressPercentage === 100 && (
+                  <span className="text-xs font-medium text-green-400">
+                    Course completed ✓
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
@@ -736,34 +692,49 @@ export default function CourseDetailsPage({
 
         {(isInstructor ||
           enrolled) && (
-          <section
-            style={{
-              marginTop: "40px",
-            }}
-          >
-            <h2>Lessons</h2>
+          <section className="mt-8">
+
+            <div className="mb-5 flex items-end justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+                  Course content
+                </p>
+
+                <h2 className="mt-1 text-2xl font-bold tracking-tight">
+                  Lessons
+                </h2>
+              </div>
+
+              {totalLessons > 0 && (
+                <span className="text-sm text-[#666]">
+                  {totalLessons}{" "}
+                  {totalLessons === 1
+                    ? "lesson"
+                    : "lessons"}
+                </span>
+              )}
+            </div>
 
             {course.lessons.length ===
             0 ? (
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "25px",
-                  border:
-                    "1px dashed #444",
-                  borderRadius: "12px",
-                  color: "#999",
-                }}
-              >
-                No lessons added to this
-                course yet.
+              <div className="rounded-2xl border border-dashed border-[#292929] bg-[#0b0b0b] px-6 py-14 text-center">
+
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-[#f15a24]/20 bg-[#f15a24]/[0.06] text-[#f15a24]">
+                  ◈
+                </div>
+
+                <h3 className="mt-4 text-lg font-semibold">
+                  No lessons yet
+                </h3>
+
+                <p className="mt-2 text-sm text-[#777]">
+                  No lessons have been added to
+                  this course yet.
+                </p>
               </div>
             ) : (
-              <div
-                style={{
-                  marginTop: "20px",
-                }}
-              >
+              <div className="space-y-3">
+
                 {course.lessons.map(
                   (lesson, index) => {
                     const isCompleted =
@@ -776,121 +747,92 @@ export default function CourseDetailsPage({
                         key={
                           lesson.documentId
                         }
-                        style={{
-                          border:
-                            "1px solid #333",
-                          borderRadius: "12px",
-                          padding: "22px",
-                          marginBottom:
-                            "18px",
-                        }}
+                        className={`group rounded-2xl border bg-[#0b0b0b] p-5 transition-all duration-200 sm:p-6 ${
+                          isCompleted
+                            ? "border-green-500/20"
+                            : "border-[#292929] hover:border-[#f15a24]/30"
+                        }`}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent:
-                              "space-between",
-                            alignItems:
-                              "center",
-                            gap: "15px",
-                          }}
-                        >
-                          <h3
-                            style={{
-                              margin: 0,
-                            }}
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+                          <div className="flex min-w-0 items-start gap-4">
+
+                            {/* Number */}
+
+                            <div
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-semibold ${
+                                isCompleted
+                                  ? "border-green-500/20 bg-green-500/[0.06] text-green-400"
+                                  : "border-[#f15a24]/20 bg-[#f15a24]/[0.06] text-[#f15a24]"
+                              }`}
+                            >
+                              {isCompleted
+                                ? "✓"
+                                : String(
+                                    index + 1
+                                  ).padStart(
+                                    2,
+                                    "0"
+                                  )}
+                            </div>
+
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+
+                                <h3 className="text-base font-semibold text-[#f5f5f5] sm:text-lg">
+                                  {lesson.title}
+                                </h3>
+
+                                {isCompleted &&
+                                  !isInstructor && (
+                                    <span className="text-[10px] font-semibold uppercase tracking-wide text-green-400">
+                                      Completed
+                                    </span>
+                                  )}
+                              </div>
+
+                              <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#777]">
+                                {lesson.content}
+                              </p>
+                            </div>
+                          </div>
+
+                          <Link
+                            href={`/lessons/${lesson.documentId}`}
+                            className="group/link flex shrink-0 items-center justify-center rounded-xl border border-[#292929] bg-[#050505] px-5 py-3 text-sm font-semibold text-[#f5f5f5] transition hover:border-[#f15a24]/40 hover:bg-[#f15a24]/[0.06]"
                           >
-                            {index + 1}.{" "}
-                            {lesson.title}
-                          </h3>
+                            Open Lesson
 
-                          {isCompleted &&
-                            !isInstructor && (
-                              <span
-                                style={{
-                                  color:
-                                    "#22c55e",
-                                  fontSize:
-                                    "14px",
-                                }}
-                              >
-                                ✓ Completed
-                              </span>
-                            )}
+                            <span className="ml-2 text-[#f15a24] transition-transform group-hover/link:translate-x-1">
+                              →
+                            </span>
+                          </Link>
+
                         </div>
-
-                        <p
-                          style={{
-                            marginTop: "12px",
-                            color: "#aaa",
-                          }}
-                        >
-                          {lesson.content}
-                        </p>
-
-                        <Link
-                          href={`/lessons/${lesson.documentId}`}
-                          style={{
-                            display:
-                              "inline-block",
-                            marginTop: "18px",
-                            padding:
-                              "10px 16px",
-                            border:
-                              "1px solid #444",
-                            borderRadius: "7px",
-                            textDecoration:
-                              "none",
-                            color: "white",
-                          }}
-                        >
-                          Open Lesson →
-                        </Link>
                       </div>
                     );
                   }
                 )}
+
               </div>
             )}
           </section>
         )}
 
-        {/* ENROLLMENT FOOTER */}
+        {/* MY COURSES */}
 
         {!isInstructor &&
           enrolled && (
-            <div
-              style={{
-                marginTop: "25px",
-              }}
-            >
-              <p
-                style={{
-                  color: "#22c55e",
-                }}
-              >
-                ✓ Already Enrolled
-              </p>
-
+            <div className="mt-7 border-t border-[#1c1c1c] pt-6">
               <Link
                 href="/my-courses"
-                style={{
-                  display:
-                    "inline-block",
-                  marginTop: "12px",
-                  padding: "10px 16px",
-                  border:
-                    "1px solid #444",
-                  borderRadius: "7px",
-                  textDecoration:
-                    "none",
-                  color: "white",
-                }}
+                className="inline-flex items-center text-sm font-medium text-[#888] transition hover:text-[#f15a24]"
               >
-                Go to My Courses →
+                ← Go to My Courses
               </Link>
             </div>
           )}
+
       </div>
     </main>
   );

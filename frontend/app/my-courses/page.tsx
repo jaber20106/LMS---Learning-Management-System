@@ -58,13 +58,17 @@ type ErrorResponse = {
 };
 
 export default function MyCoursesPage() {
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [enrollments, setEnrollments] =
+    useState<Enrollment[]>([]);
+  const [loading, setLoading] =
+    useState(true);
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
     async function loadMyCourses() {
-      const token = localStorage.getItem("lms_token");
+      const token =
+        localStorage.getItem("lms_token");
 
       if (!token) {
         setMessage("Please login first.");
@@ -78,17 +82,24 @@ export default function MyCoursesPage() {
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+              Authorization:
+                `Bearer ${token}`,
+              "Content-Type":
+                "application/json",
             },
             cache: "no-store",
           }
         );
 
-        const result: MeResponse | ErrorResponse =
+        const result:
+          | MeResponse
+          | ErrorResponse =
           await response.json();
 
-        console.log("MY COURSES RESPONSE:", result);
+        console.log(
+          "MY COURSES RESPONSE:",
+          result
+        );
 
         if (!response.ok) {
           setMessage(
@@ -105,37 +116,54 @@ export default function MyCoursesPage() {
           return;
         }
 
-        const userEnrollments = Array.isArray(
-          result.enrollments
-        )
-          ? result.enrollments
-          : [];
+        const userEnrollments =
+          Array.isArray(
+            result.enrollments
+          )
+            ? result.enrollments
+            : [];
 
         const validEnrollments =
           userEnrollments.filter(
-            (enrollment) => enrollment.course
+            (enrollment) =>
+              enrollment.course
           );
 
-        const uniqueEnrollments: Enrollment[] = [];
-        const seenCourses = new Set<string>();
+        const uniqueEnrollments: Enrollment[] =
+          [];
 
-        for (const enrollment of validEnrollments) {
-          const course = enrollment.course;
+        const seenCourses =
+          new Set<string>();
+
+        for (const enrollment of
+          validEnrollments) {
+          const course =
+            enrollment.course;
 
           if (!course) {
             continue;
           }
 
-          if (seenCourses.has(course.documentId)) {
+          if (
+            seenCourses.has(
+              course.documentId
+            )
+          ) {
             continue;
           }
 
-          seenCourses.add(course.documentId);
-          uniqueEnrollments.push(enrollment);
+          seenCourses.add(
+            course.documentId
+          );
+
+          uniqueEnrollments.push(
+            enrollment
+          );
         }
 
-        
-        setEnrollments(uniqueEnrollments);
+        setEnrollments(
+          uniqueEnrollments
+        );
       } catch (error) {
         console.error(
           "My Courses Error:",
@@ -153,429 +181,384 @@ export default function MyCoursesPage() {
     loadMyCourses();
   }, []);
 
+  // ==========================================
+  // LOADING
+  // ==========================================
+
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "60px 30px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "0 auto",
-          }}
-        >
-          <h1>My Courses</h1>
+      <main className="min-h-screen bg-[#050505] px-4 py-10 text-[#f5f5f5] sm:px-8 sm:py-14 lg:px-12">
+        <div className="mx-auto max-w-7xl">
 
-          <p style={{ color: "#999" }}>
-            Loading your courses...
-          </p>
+          <div className="animate-pulse">
+            <div className="h-4 w-28 rounded bg-white/[0.06]" />
+
+            <div className="mt-8 h-12 w-64 rounded bg-white/[0.06]" />
+
+            <div className="mt-4 h-5 w-80 max-w-full rounded bg-white/[0.04]" />
+
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="h-[420px] rounded-2xl bg-white/[0.04]" />
+              <div className="h-[420px] rounded-2xl bg-white/[0.04]" />
+              <div className="hidden h-[420px] rounded-2xl bg-white/[0.04] lg:block" />
+            </div>
+          </div>
+
         </div>
       </main>
     );
   }
 
+  // ==========================================
+  // ERROR
+  // ==========================================
+
   if (message) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "60px 30px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "800px",
-            margin: "0 auto",
-          }}
-        >
-          <h1>My Courses</h1>
+      <main className="min-h-screen bg-[#050505] px-4 py-10 text-[#f5f5f5] sm:px-8 sm:py-14 lg:px-12">
+        <div className="mx-auto max-w-4xl">
 
-          <p
-            style={{
-              marginTop: "20px",
-              color: "#ccc",
-            }}
-          >
-            {message}
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#f15a24]">
+            Student
           </p>
 
-          <Link
-            href="/login"
-            style={{
-              display: "inline-block",
-              marginTop: "20px",
-              padding: "10px 18px",
-              border: "1px solid #444",
-              borderRadius: "7px",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Go to Login
-          </Link>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+            My Courses
+          </h1>
+
+          <div className="mt-7 rounded-2xl border border-[#292929] bg-[#0b0b0b] p-6">
+            <p className="text-sm leading-6 text-[#999]">
+              {message}
+            </p>
+
+            <Link
+              href="/login"
+              className="mt-5 inline-flex rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f]"
+            >
+              Go to Login →
+            </Link>
+          </div>
+
         </div>
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "60px 30px 100px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-        }}
-      >
+    <main className="min-h-screen overflow-hidden bg-[#050505] px-4 py-8 text-[#f5f5f5] sm:px-8 sm:py-10 lg:px-12 lg:pb-16">
+
+      {/* Background */}
+
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute left-1/2 top-[-220px] h-[500px] w-[750px] -translate-x-1/2 rounded-full bg-[#f15a24]/[0.04] blur-[130px]" />
+      </div>
+
+      <div className="mx-auto max-w-7xl">
+
+        {/* Back */}
+
         <Link
           href="/courses"
-          style={{
-            color: "#aaa",
-            textDecoration: "none",
-          }}
+          className="group inline-flex items-center gap-2 text-sm text-[#777] transition hover:text-[#f15a24]"
         >
-          ← Browse Courses
+          <span className="transition-transform group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Browse Courses
         </Link>
 
-        <div
-          style={{
-            marginTop: "30px",
-            marginBottom: "40px",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: "#888",
-              fontSize: "14px",
-            }}
-          >
+        {/* Header */}
+
+        <div className="mt-8 max-w-3xl sm:mt-10">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#f15a24]">
             Student
           </p>
 
-          <h1
-            style={{
-              margin: "8px 0 0",
-              fontSize: "40px",
-            }}
-          >
+          <h1 className="text-4xl font-bold tracking-[-0.04em] text-[#f5f5f5] sm:text-5xl md:text-6xl">
             My Courses
           </h1>
 
-          <p
-            style={{
-              marginTop: "10px",
-              color: "#999",
-            }}
-          >
+          <p className="mt-3 text-sm leading-6 text-[#888] sm:text-base">
             Courses you have enrolled in.
           </p>
         </div>
 
+        {/* Course count */}
+
+        {enrollments.length > 0 && (
+          <div className="mt-7 border-b border-[#202020] pb-4">
+            <p className="text-sm text-[#666]">
+              {enrollments.length}{" "}
+              {enrollments.length === 1
+                ? "course"
+                : "courses"}{" "}
+              enrolled
+            </p>
+          </div>
+        )}
+
+        {/* EMPTY */}
+
         {enrollments.length === 0 ? (
-          <div
-            style={{
-              border: "1px dashed #444",
-              borderRadius: "12px",
-              padding: "50px 30px",
-              textAlign: "center",
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "24px",
-              }}
-            >
+          <div className="mt-6 rounded-2xl border border-dashed border-[#292929] bg-[#0b0b0b] px-5 py-14 text-center sm:px-8">
+
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-[#f15a24]/20 bg-[#f15a24]/[0.06] text-xl text-[#f15a24]">
+              ◈
+            </div>
+
+            <h2 className="mt-5 text-xl font-semibold text-[#f5f5f5]">
               No enrolled courses
             </h2>
 
-            <p
-              style={{
-                marginTop: "10px",
-                color: "#888",
-              }}
-            >
-              Enroll in a course to start learning.
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#777]">
+              Enroll in a course to start
+              learning.
             </p>
 
             <Link
               href="/courses"
-              style={{
-                display: "inline-block",
-                marginTop: "20px",
-                padding: "11px 18px",
-                borderRadius: "8px",
-                background: "white",
-                color: "black",
-                textDecoration: "none",
-                fontWeight: "600",
-              }}
+              className="mt-5 inline-flex items-center rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f]"
             >
-              Browse Courses →
+              Browse Courses
+              <span className="ml-2">
+                →
+              </span>
             </Link>
+
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: "22px",
-            }}
-          >
-            {enrollments.map((enrollment) => {
-              const course = enrollment.course;
+          /* COURSES */
+          <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
-              if (!course) {
-                return null;
-              }
+            {enrollments.map(
+              (enrollment) => {
+                const course =
+                  enrollment.course;
 
-              const lessons = course.lessons || [];
-              const quizzes = course.quizzes || [];
+                if (!course) {
+                  return null;
+                }
 
-              return (
-                <article
-                  key={course.documentId}
-                  style={{
-                    border: "1px solid #333",
-                    borderRadius: "14px",
-                    padding: "24px",
-                    background: "#111",
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      color: "#777",
-                      fontSize: "13px",
-                    }}
+                const lessons =
+                  course.lessons || [];
+
+                const quizzes =
+                  course.quizzes || [];
+
+                return (
+                  <article
+                    key={
+                      course.documentId
+                    }
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-[#292929] bg-[#0b0b0b] transition-all duration-300 hover:-translate-y-1 hover:border-[#f15a24]/40"
                   >
-                    Enrolled Course
-                  </p>
 
-                  <h2
-                    style={{
-                      marginTop: "8px",
-                      marginBottom: "10px",
-                      fontSize: "24px",
-                    }}
-                  >
-                    {course.title}
-                  </h2>
+                    {/* Card Header */}
 
-                  <p
-                    style={{
-                      color: "#aaa",
-                      lineHeight: "1.6",
-                    }}
-                  >
-                    {course.description}
-                  </p>
+                    <div className="relative flex h-24 items-center justify-center border-b border-[#202020] bg-[#090909]">
 
-                  {/* LESSONS */}
+                      <div className="absolute inset-0 bg-[#f15a24]/[0.035] opacity-0 transition group-hover:opacity-100" />
 
-                  <div
-                    style={{
-                      marginTop: "22px",
-                      paddingTop: "18px",
-                      borderTop: "1px solid #292929",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: "18px",
-                      }}
-                    >
-                      Lessons ({lessons.length})
-                    </h3>
-
-                    {lessons.length === 0 ? (
-                      <p
-                        style={{
-                          color: "#777",
-                          marginTop: "12px",
-                        }}
-                      >
-                        No lessons available yet.
-                      </p>
-                    ) : (
-                      <div
-                        style={{
-                          marginTop: "12px",
-                        }}
-                      >
-                        {lessons.map(
-                          (lesson, index) => (
-                            <Link
-                              key={
-                                lesson.documentId
-                              }
-                              href={`/lessons/${lesson.documentId}`}
-                              style={{
-                                display: "block",
-                                padding: "11px 0",
-                                borderBottom:
-                                  "1px solid #222",
-                                color: "white",
-                                textDecoration:
-                                  "none",
-                              }}
-                            >
-                              Lesson {index + 1}:{" "}
-                              {lesson.title}
-                            </Link>
-                          )
-                        )}
+                      <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#f15a24]/20 bg-[#f15a24]/[0.07] text-lg text-[#f15a24]">
+                        ◈
                       </div>
-                    )}
-                  </div>
 
-                  {/* QUIZZES */}
+                    </div>
 
-                  <div
-                    style={{
-                      marginTop: "22px",
-                      paddingTop: "18px",
-                      borderTop: "1px solid #292929",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: "18px",
-                      }}
-                    >
-                      Quizzes ({quizzes.length})
-                    </h3>
+                    {/* Course Info */}
 
-                    {quizzes.length === 0 ? (
-                      <p
-                        style={{
-                          color: "#777",
-                          marginTop: "12px",
-                        }}
-                      >
-                        No quizzes available yet.
+                    <div className="p-5 sm:p-6">
+
+                      <div className="flex items-center justify-between gap-3">
+
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+                          Enrolled Course
+                        </p>
+
+                        <span className="rounded-full border border-green-500/20 bg-green-500/[0.06] px-2.5 py-1 text-[10px] font-medium text-green-400">
+                          Enrolled
+                        </span>
+
+                      </div>
+
+                      <h2 className="mt-3 text-xl font-semibold leading-7 text-[#f5f5f5]">
+                        {course.title}
+                      </h2>
+
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#777]">
+                        {course.description}
                       </p>
-                    ) : (
-                      <div
-                        style={{
-                          marginTop: "12px",
-                        }}
-                      >
-                        {quizzes.map(
-                          (quiz, index) => (
-                            <div
-                              key={
-                                quiz.documentId
-                              }
-                              style={{
-                                padding:
-                                  "14px 0",
-                                borderBottom:
-                                  "1px solid #222",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent:
-                                    "space-between",
-                                  alignItems:
-                                    "center",
-                                  gap: "12px",
-                                }}
-                              >
-                                <div>
-                                  <p
-                                    style={{
-                                      margin: 0,
-                                      color:
-                                        "white",
-                                      fontWeight:
-                                        "600",
-                                    }}
-                                  >
-                                    Quiz {index + 1}:{" "}
-                                    {quiz.title}
-                                  </p>
 
-                                  <p
-                                    style={{
-                                      margin:
-                                        "5px 0 0",
-                                      color:
-                                        "#777",
-                                      fontSize:
-                                        "13px",
-                                    }}
-                                  >
-                                    {quiz.questions
-                                      ?.length || 0}{" "}
-                                    questions
-                                  </p>
-                                </div>
+                      {/* Stats */}
 
+                      <div className="mt-5 grid grid-cols-2 gap-2">
+
+                        <div className="rounded-xl border border-[#242424] bg-[#070707] p-3">
+                          <p className="text-[10px] uppercase tracking-[0.15em] text-[#555]">
+                            Lessons
+                          </p>
+
+                          <p className="mt-1 text-lg font-semibold text-[#f5f5f5]">
+                            {lessons.length}
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-[#242424] bg-[#070707] p-3">
+                          <p className="text-[10px] uppercase tracking-[0.15em] text-[#555]">
+                            Quizzes
+                          </p>
+
+                          <p className="mt-1 text-lg font-semibold text-[#f5f5f5]">
+                            {quizzes.length}
+                          </p>
+                        </div>
+
+                      </div>
+
+                      {/* Lessons */}
+
+                      <div className="mt-6 border-t border-[#202020] pt-5">
+
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-semibold text-[#f5f5f5]">
+                            Lessons
+                          </h3>
+
+                          <span className="text-xs text-[#666]">
+                            {lessons.length}
+                          </span>
+                        </div>
+
+                        {lessons.length ===
+                        0 ? (
+                          <p className="mt-3 text-xs text-[#666]">
+                            No lessons available yet.
+                          </p>
+                        ) : (
+                          <div className="mt-2 max-h-36 overflow-y-auto pr-1">
+
+                            {lessons.map(
+                              (
+                                lesson,
+                                index
+                              ) => (
                                 <Link
-                                  href={`/quizzes/${quiz.documentId}`}
-                                  style={{
-                                    padding:
-                                      "8px 12px",
-                                    borderRadius:
-                                      "7px",
-                                    background:
-                                      "white",
-                                    color:
-                                      "black",
-                                    textDecoration:
-                                      "none",
-                                    fontSize:
-                                      "13px",
-                                    fontWeight:
-                                      "700",
-                                    whiteSpace:
-                                      "nowrap",
-                                  }}
+                                  key={
+                                    lesson.documentId
+                                  }
+                                  href={`/lessons/${lesson.documentId}`}
+                                  className="flex items-center gap-3 border-b border-[#1c1c1c] py-2.5 text-sm text-[#999] transition hover:text-[#f15a24]"
                                 >
-                                  Start Quiz
+                                  <span className="text-[10px] text-[#f15a24]">
+                                    {String(
+                                      index + 1
+                                    ).padStart(
+                                      2,
+                                      "0"
+                                    )}
+                                  </span>
+
+                                  <span className="truncate">
+                                    {lesson.title}
+                                  </span>
                                 </Link>
-                              </div>
-                            </div>
-                          )
+                              )
+                            )}
+
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
 
-                  <Link
-                    href={`/courses/${course.documentId}`}
-                    style={{
-                      display: "inline-block",
-                      marginTop: "22px",
-                      padding: "11px 18px",
-                      borderRadius: "8px",
-                      background: "white",
-                      color: "black",
-                      textDecoration: "none",
-                      fontWeight: "600",
-                    }}
-                  >
-                    Continue Learning →
-                  </Link>
-                </article>
-              );
-            })}
+                      {/* Quizzes */}
+
+                      <div className="mt-5 border-t border-[#202020] pt-5">
+
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-semibold text-[#f5f5f5]">
+                            Quizzes
+                          </h3>
+
+                          <span className="text-xs text-[#666]">
+                            {quizzes.length}
+                          </span>
+                        </div>
+
+                        {quizzes.length ===
+                        0 ? (
+                          <p className="mt-3 text-xs text-[#666]">
+                            No quizzes available yet.
+                          </p>
+                        ) : (
+                          <div className="mt-2 space-y-2">
+
+                            {quizzes.map(
+                              (
+                                quiz,
+                                index
+                              ) => (
+                                <div
+                                  key={
+                                    quiz.documentId
+                                  }
+                                  className="flex items-center justify-between gap-3 rounded-xl border border-[#242424] bg-[#070707] p-3"
+                                >
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium text-[#ddd]">
+                                      Quiz{" "}
+                                      {index +
+                                        1}
+                                      :{" "}
+                                      {
+                                        quiz.title
+                                      }
+                                    </p>
+
+                                    <p className="mt-1 text-[11px] text-[#666]">
+                                      {quiz
+                                        .questions
+                                        ?.length ||
+                                        0}{" "}
+                                      questions
+                                    </p>
+                                  </div>
+
+                                  <Link
+                                    href={`/quizzes/${quiz.documentId}`}
+                                    className="shrink-0 rounded-lg bg-[#f15a24] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#d94b1f]"
+                                  >
+                                    Start
+                                  </Link>
+                                </div>
+                              )
+                            )}
+
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Continue */}
+
+                      <Link
+                        href={`/courses/${course.documentId}`}
+                        className="group/button mt-6 flex w-full items-center justify-center rounded-xl border border-[#292929] bg-[#050505] px-5 py-3 text-sm font-semibold text-[#f5f5f5] transition hover:border-[#f15a24]/40 hover:bg-[#f15a24]/[0.06]"
+                      >
+                        Continue Learning
+
+                        <span className="ml-2 text-[#f15a24] transition-transform group-hover/button:translate-x-1">
+                          →
+                        </span>
+                      </Link>
+
+                    </div>
+                  </article>
+                );
+              }
+            )}
+
           </div>
         )}
+
       </div>
     </main>
   );

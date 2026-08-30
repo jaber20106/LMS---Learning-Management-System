@@ -27,9 +27,8 @@ export default function ManageQuizzesPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(
-    null
-  );
+  const [deletingId, setDeletingId] =
+    useState<string | null>(null);
 
   useEffect(() => {
     loadQuizzes();
@@ -65,7 +64,8 @@ export default function ManageQuizzesPage() {
 
       if (!userResponse.ok) {
         throw new Error(
-          user?.error?.message || "Failed to load user"
+          user?.error?.message ||
+            "Failed to load user"
         );
       }
 
@@ -84,12 +84,15 @@ export default function ManageQuizzesPage() {
 
       console.log("COURSES URL:", coursesUrl);
 
-      const coursesResponse = await fetch(coursesUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        cache: "no-store",
-      });
+      const coursesResponse = await fetch(
+        coursesUrl,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        }
+      );
 
       const coursesResult =
         await coursesResponse.json();
@@ -172,7 +175,7 @@ export default function ManageQuizzesPage() {
           (quiz: Quiz) => {
             collectedQuizzes.push({
               ...quiz,
-              course: course,
+              course,
             });
           }
         );
@@ -228,7 +231,8 @@ export default function ManageQuizzesPage() {
       return;
     }
 
-    const token = localStorage.getItem("lms_token");
+    const token =
+      localStorage.getItem("lms_token");
 
     if (!token) {
       setMessage("Please login first.");
@@ -236,6 +240,7 @@ export default function ManageQuizzesPage() {
     }
 
     setDeletingId(documentId);
+    setMessage("");
 
     try {
       const response = await fetch(
@@ -293,295 +298,288 @@ export default function ManageQuizzesPage() {
 
   if (loading) {
     return (
-      <main style={pageStyle}>
-        <div style={containerStyle}>
-          <Link
-            href="/instructor/dashboard"
-            style={backStyle}
-          >
-            ← Dashboard
-          </Link>
+      <main className="min-h-screen bg-[#050505] px-4 py-8 text-white sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-6xl animate-pulse">
 
-          <h1 style={headingStyle}>
-            Manage Quizzes
-          </h1>
+          <div className="h-4 w-28 rounded bg-white/[0.06]" />
 
-          <p style={mutedStyle}>
-            Loading quizzes...
-          </p>
+          <div className="mt-6 h-10 w-72 max-w-full rounded bg-white/[0.06]" />
+
+          <div className="mt-3 h-4 w-96 max-w-full rounded bg-white/[0.04]" />
+
+          <div className="mt-8 h-32 rounded-2xl bg-white/[0.04]" />
+
+          <div className="mt-4 h-32 rounded-2xl bg-white/[0.04]" />
+
         </div>
       </main>
     );
   }
 
-  // ==========================================
-  // PAGE
-  // ==========================================
-
   return (
-    <main style={pageStyle}>
-      <div style={containerStyle}>
+    <main className="min-h-screen bg-[#050505] px-4 py-7 pb-16 text-white sm:px-8 sm:py-10 lg:px-12">
+
+      <div className="mx-auto max-w-6xl">
+
+        {/* =====================================
+            BACK
+        ===================================== */}
+
         <Link
           href="/instructor/dashboard"
-          style={backStyle}
+          className="group inline-flex items-center gap-2 text-sm text-[#777] transition hover:text-[#f15a24]"
         >
-          ← Dashboard
+          <span className="transition-transform group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Dashboard
         </Link>
 
-        <div style={headerStyle}>
-          <div>
-            <p style={eyebrowStyle}>
-              Instructor
-            </p>
+        {/* =====================================
+            HEADER
+        ===================================== */}
 
-            <h1 style={headingStyle}>
-              Manage Quizzes
-            </h1>
+        <section className="mt-7 rounded-3xl border border-[#292929] bg-[#0b0b0b] p-6 sm:p-8">
 
-            <p style={mutedStyle}>
-              Manage quizzes from your courses.
-            </p>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+
+            <div>
+
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#f15a24]/20 bg-[#f15a24]/[0.06] px-3 py-1.5">
+
+                <span className="h-1.5 w-1.5 rounded-full bg-[#f15a24]" />
+
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f15a24]">
+                  Instructor
+                </span>
+
+              </div>
+
+              <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+                Manage Quizzes
+              </h1>
+
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#777] sm:text-base">
+                Create, edit and manage quizzes
+                from your courses.
+              </p>
+
+            </div>
+
+            <Link
+              href="/instructor/dashboard/quizzes"
+              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f]"
+            >
+              + Create Quiz
+            </Link>
+
           </div>
 
-          <Link
-            href="/instructor/dashboard/quizzes"
-            style={createButtonStyle}
-          >
-            + Create Quiz
-          </Link>
-        </div>
+        </section>
+
+        {/* =====================================
+            MESSAGE
+        ===================================== */}
 
         {message && (
-          <div style={messageStyle}>
+          <div className="mt-5 rounded-xl border border-[#292929] bg-[#0b0b0b] px-4 py-3 text-sm text-[#aaa]">
             {message}
           </div>
         )}
 
+        {/* =====================================
+            SUMMARY
+        ===================================== */}
+
+        <div className="mt-6 flex items-center justify-between border-b border-[#202020] pb-4">
+
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+              Quiz Library
+            </p>
+
+            <h2 className="mt-1 text-xl font-semibold">
+              Your Quizzes
+            </h2>
+          </div>
+
+          <span className="text-sm text-[#555]">
+            {quizzes.length}{" "}
+            {quizzes.length === 1
+              ? "quiz"
+              : "quizzes"}
+          </span>
+
+        </div>
+
+        {/* =====================================
+            EMPTY
+        ===================================== */}
+
         {quizzes.length === 0 ? (
-          <div style={emptyStyle}>
-            <h2
-              style={{
-                marginTop: 0,
-                color: "white",
-              }}
-            >
+          <div className="mt-6 rounded-2xl border border-dashed border-[#292929] bg-[#0b0b0b] px-5 py-14 text-center">
+
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#f15a24]/20 bg-[#f15a24]/[0.06] text-xl text-[#f15a24]">
+              ?
+            </div>
+
+            <h2 className="mt-5 text-xl font-semibold">
               No quizzes found
             </h2>
 
-            <p>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#666]">
               No quizzes were found in your
-              courses.
+              published courses.
             </p>
 
             <Link
               href="/instructor/dashboard/quizzes"
-              style={createButtonStyle}
+              className="mt-6 inline-flex rounded-xl bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f]"
             >
               Create Quiz
             </Link>
+
           </div>
         ) : (
-          <div style={listStyle}>
-            {quizzes.map((quiz) => (
-              <div
-                key={quiz.documentId}
-                style={quizCardStyle}
-              >
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      color: "#777",
-                      fontSize: "13px",
-                    }}
-                  >
-                    COURSE
-                  </div>
 
-                  <div
-                    style={{
-                      color: "#aaa",
-                      marginTop: "4px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    {quiz.course?.title ||
-                      "Unknown course"}
-                  </div>
+          /* ===================================
+             QUIZ LIST
+          =================================== */
 
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: "24px",
-                    }}
-                  >
-                    {quiz.title}
-                  </h2>
+          <div className="mt-6 space-y-4">
 
-                  <p
-                    style={{
-                      color: "#999",
-                    }}
-                  >
-                    {quiz.description ||
-                      "No description"}
-                  </p>
+            {quizzes.map(
+              (quiz, index) => (
+                <article
+                  key={quiz.documentId}
+                  className="overflow-hidden rounded-2xl border border-[#292929] bg-[#0b0b0b] transition hover:border-[#f15a24]/30"
+                >
 
-                  <p
-                    style={{
-                      color: "#777",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Questions:{" "}
-                    {quiz.questions?.length || 0}
-                  </p>
-                </div>
+                  <div className="p-5 sm:p-6">
 
-                <div style={actionsStyle}>
-                  <Link
-                    href={`/instructor/dashboard/quizzes/edit/${quiz.documentId}`}
-                    style={editButtonStyle}
-                  >
-                    Edit
-                  </Link>
+                    {/* Top */}
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleDelete(
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+
+                      <div className="min-w-0">
+
+                        <div className="flex flex-wrap items-center gap-2">
+
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f15a24]/[0.08] text-xs font-semibold text-[#f15a24]">
+                            {String(
+                              index + 1
+                            ).padStart(
+                              2,
+                              "0"
+                            )}
+                          </span>
+
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#666]">
+                            Quiz
+                          </span>
+
+                          {quiz.course?.title && (
+                            <>
+                              <span className="text-[#333]">
+                                /
+                              </span>
+
+                              <span className="max-w-[220px] truncate text-xs text-[#777]">
+                                {quiz.course.title}
+                              </span>
+                            </>
+                          )}
+
+                        </div>
+
+                        <h2 className="mt-4 text-xl font-semibold leading-7 text-[#f5f5f5] sm:text-2xl">
+                          {quiz.title}
+                        </h2>
+
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#777]">
+                          {quiz.description ||
+                            "No description available."}
+                        </p>
+
+                      </div>
+
+                      <div className="shrink-0 rounded-full border border-green-500/20 bg-green-500/[0.05] px-3 py-1 text-[10px] font-medium text-green-400">
+                        Published
+                      </div>
+
+                    </div>
+
+                    {/* Meta */}
+
+                    <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[#202020] pt-4">
+
+                      <div>
+                        <span className="text-xs text-[#555]">
+                          Course
+                        </span>
+
+                        <p className="mt-0.5 text-sm text-[#aaa]">
+                          {quiz.course?.title ||
+                            "Unknown course"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span className="text-xs text-[#555]">
+                          Questions
+                        </span>
+
+                        <p className="mt-0.5 text-sm text-[#aaa]">
+                          {quiz.questions?.length ||
+                            0}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* Actions */}
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+
+                      <Link
+                        href={`/instructor/dashboard/quizzes/edit/${quiz.documentId}`}
+                        className="inline-flex items-center justify-center rounded-lg bg-[#f15a24] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#d94b1f]"
+                      >
+                        Edit Quiz
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDelete(
+                            quiz.documentId
+                          )
+                        }
+                        disabled={
+                          deletingId ===
+                          quiz.documentId
+                        }
+                        className="inline-flex items-center justify-center rounded-lg border border-red-500/20 bg-transparent px-4 py-2.5 text-xs font-medium text-red-400 transition hover:bg-red-500/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {deletingId ===
                         quiz.documentId
-                      )
-                    }
-                    disabled={
-                      deletingId ===
-                      quiz.documentId
-                    }
-                    style={deleteButtonStyle}
-                  >
-                    {deletingId ===
-                    quiz.documentId
-                      ? "Deleting..."
-                      : "Delete"}
-                  </button>
-                </div>
-              </div>
-            ))}
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </article>
+              )
+            )}
+
           </div>
         )}
+
       </div>
     </main>
   );
 }
-
-// ==========================================
-// STYLES
-// ==========================================
-
-const pageStyle = {
-  minHeight: "100vh",
-  padding: "55px 25px 100px",
-};
-
-const containerStyle = {
-  maxWidth: "1000px",
-  margin: "0 auto",
-};
-
-const backStyle = {
-  color: "#aaa",
-  textDecoration: "none",
-  fontSize: "14px",
-};
-
-const headerStyle = {
-  marginTop: "30px",
-  marginBottom: "30px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-end",
-  gap: "20px",
-  flexWrap: "wrap" as const,
-};
-
-const eyebrowStyle = {
-  margin: 0,
-  color: "#888",
-};
-
-const headingStyle = {
-  margin: "8px 0",
-  fontSize: "38px",
-};
-
-const mutedStyle = {
-  color: "#999",
-};
-
-const createButtonStyle = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "12px 18px",
-  borderRadius: "8px",
-  background: "white",
-  color: "black",
-  textDecoration: "none",
-  fontWeight: "700",
-};
-
-const messageStyle = {
-  marginBottom: "25px",
-  padding: "13px 15px",
-  border: "1px solid #444",
-  borderRadius: "8px",
-  color: "#ccc",
-};
-
-const emptyStyle = {
-  marginTop: "35px",
-  padding: "45px 25px",
-  border: "1px dashed #444",
-  borderRadius: "12px",
-  textAlign: "center" as const,
-  color: "#888",
-};
-
-const listStyle = {
-  display: "grid",
-  gap: "18px",
-};
-
-const quizCardStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: "25px",
-  padding: "25px",
-  border: "1px solid #333",
-  borderRadius: "12px",
-  background: "#111",
-  flexWrap: "wrap" as const,
-};
-
-const actionsStyle = {
-  display: "flex",
-  gap: "10px",
-};
-
-const editButtonStyle = {
-  padding: "10px 16px",
-  border: "1px solid #444",
-  borderRadius: "7px",
-  background: "transparent",
-  color: "white",
-  textDecoration: "none",
-};
-
-const deleteButtonStyle = {
-  padding: "10px 16px",
-  border: "1px solid #633",
-  borderRadius: "7px",
-  background: "transparent",
-  color: "#ff7777",
-  cursor: "pointer",
-};

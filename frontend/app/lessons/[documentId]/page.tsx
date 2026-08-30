@@ -193,10 +193,6 @@ export default function LessonDetailsPage({
 
         // ======================================
         // 3. GET ALL PROGRESS
-        //
-        // Don't use the old nested filter.
-        // We filter current user + lesson
-        // on the client side.
         // ======================================
 
         const progressResponse =
@@ -228,8 +224,6 @@ export default function LessonDetailsPage({
             progressResult
           );
 
-          // Don't stop lesson page.
-          // User can still try Mark Complete.
           if (!cancelled) {
             setProgress(null);
           }
@@ -257,12 +251,13 @@ export default function LessonDetailsPage({
           progressList.find(
             (item) => {
               const progressUserId =
-  item?.user?.id ||
-  item?.user?.data?.id;
+                item?.user?.id ||
+                item?.user?.data?.id;
 
               const progressLessonId =
-  item?.lesson?.documentId ||
-  item?.lesson?.data?.documentId;
+                item?.lesson?.documentId ||
+                item?.lesson?.data
+                  ?.documentId;
 
               return (
                 progressUserId ===
@@ -539,25 +534,14 @@ export default function LessonDetailsPage({
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "60px 30px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "900px",
-            margin: "0 auto",
-          }}
-        >
-          <p
-            style={{
-              color: "#999",
-            }}
-          >
-            Loading lesson...
-          </p>
+      <main className="min-h-screen bg-[#050505] px-4 py-10 text-[#f5f5f5] sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-4xl">
+          <div className="animate-pulse">
+            <div className="h-4 w-20 rounded bg-white/[0.06]" />
+            <div className="mt-8 h-10 w-2/3 rounded bg-white/[0.06]" />
+            <div className="mt-4 h-4 w-full max-w-2xl rounded bg-white/[0.04]" />
+            <div className="mt-8 h-48 rounded-xl bg-white/[0.04]" />
+          </div>
         </div>
       </main>
     );
@@ -569,26 +553,18 @@ export default function LessonDetailsPage({
 
   if (!lesson) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "60px 30px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "900px",
-            margin: "0 auto",
-          }}
-        >
-          <h1>Lesson Access</h1>
+      <main className="min-h-screen bg-[#050505] px-4 py-10 text-[#f5f5f5] sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-4xl">
 
-          <p
-            style={{
-              marginTop: "20px",
-              color: "#aaa",
-            }}
-          >
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+            Lesson
+          </p>
+
+          <h1 className="mt-3 text-3xl font-bold">
+            Lesson Access
+          </h1>
+
+          <p className="mt-4 text-sm leading-6 text-[#999]">
             {message ||
               "Lesson not found."}
           </p>
@@ -598,186 +574,117 @@ export default function LessonDetailsPage({
             onClick={() =>
               router.back()
             }
-            style={{
-              marginTop: "20px",
-              padding: "10px 18px",
-              border: "1px solid #444",
-              borderRadius: "7px",
-              background: "transparent",
-              color: "white",
-              cursor: "pointer",
-            }}
+            className="mt-6 rounded-lg border border-[#292929] bg-[#0b0b0b] px-4 py-2.5 text-sm font-medium text-white transition hover:border-[#f15a24]/40"
           >
             ← Back
           </button>
+
         </div>
       </main>
     );
   }
 
+  const isCompleted =
+    progress?.completed === true;
+
   // ==========================================
   // LESSON PAGE
   // ==========================================
 
-  const isCompleted =
-    progress?.completed === true;
-
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "60px 30px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-        }}
-      >
-        {/* BACK */}
+    <main className="min-h-screen bg-[#050505] px-4 py-8 text-[#f5f5f5] sm:px-8 sm:py-10 lg:px-12">
+
+      <div className="mx-auto max-w-4xl">
+
+        {/* Back */}
 
         <button
           type="button"
           onClick={() =>
             router.back()
           }
-          style={{
-            display: "inline-block",
-            marginBottom: "30px",
-            padding: 0,
-            border: "none",
-            background: "transparent",
-            color: "#aaa",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
+          className="group inline-flex items-center gap-2 text-sm text-[#777] transition hover:text-[#f15a24]"
         >
-          ← Back
+          <span className="transition-transform group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Back
         </button>
 
-        {/* LESSON */}
+        {/* Lesson Content */}
 
-        <div
-          style={{
-            border: "1px solid #333",
-            borderRadius: "12px",
-            padding: "30px",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: "#888",
-              fontSize: "14px",
-            }}
-          >
-            Lesson
-          </p>
+        <article className="mt-7 rounded-2xl border border-[#292929] bg-[#0b0b0b]">
 
-          <h1
-            style={{
-              marginTop: "10px",
-            }}
-          >
-            {lesson.title}
-          </h1>
+          <div className="p-5 sm:p-8 lg:p-10">
 
-          <p
-            style={{
-              marginTop: "20px",
-              lineHeight: "1.8",
-              color: "#aaa",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {lesson.content}
-          </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#f15a24]">
+              Lesson
+            </p>
 
-          {/* COMPLETE AREA */}
+            <h1 className="mt-3 text-3xl font-bold leading-tight tracking-[-0.025em] text-[#f5f5f5] sm:text-4xl">
+              {lesson.title}
+            </h1>
 
-          <div
-            style={{
-              marginTop: "40px",
-              paddingTop: "25px",
-              borderTop:
-                "1px solid #333",
-            }}
-          >
-            {isCompleted ? (
-              <div>
-                <h3
-                  style={{
-                    margin: 0,
-                    color: "#22c55e",
-                  }}
+            <div className="mt-7 border-t border-[#202020] pt-7">
+              <p className="whitespace-pre-wrap text-sm leading-7 text-[#999] sm:text-base sm:leading-8">
+                {lesson.content}
+              </p>
+            </div>
+
+            {/* Complete Area */}
+
+            <div className="mt-9 border-t border-[#202020] pt-6">
+
+              {isCompleted ? (
+                <div className="rounded-xl border border-green-500/20 bg-green-500/[0.04] p-4 sm:p-5">
+
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/[0.1] text-sm text-green-400">
+                      ✓
+                    </span>
+
+                    <div>
+                      <h3 className="text-sm font-semibold text-green-400">
+                        Lesson Completed
+                      </h3>
+
+                      {progress?.completedAt && (
+                        <p className="mt-1 text-xs text-[#666]">
+                          Completed{" "}
+                          {new Date(
+                            progress.completedAt
+                          ).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={markComplete}
+                  disabled={completing}
+                  className="rounded-lg bg-[#f15a24] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d94b1f] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  ✓ Lesson Completed
-                </h3>
+                  {completing
+                    ? "Saving..."
+                    : "Mark as Complete ✓"}
+                </button>
+              )}
 
-                {progress?.completedAt && (
-                  <p
-                    style={{
-                      marginTop: "10px",
-                      color: "#999",
-                    }}
-                  >
-                    Completed at:{" "}
-                    {new Date(
-                      progress.completedAt
-                    ).toLocaleString()}
+              {message &&
+                !isCompleted && (
+                  <p className="mt-4 text-sm text-red-400">
+                    {message}
                   </p>
                 )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={markComplete}
-                disabled={completing}
-                style={{
-                  padding:
-                    "12px 20px",
-                  border:
-                    "1px solid #444",
-                  borderRadius: "7px",
-                  background:
-                    completing
-                      ? "#222"
-                      : "white",
-                  color:
-                    completing
-                      ? "#888"
-                      : "black",
-                  cursor:
-                    completing
-                      ? "not-allowed"
-                      : "pointer",
-                  fontWeight: "700",
-                }}
-              >
-                {completing
-                  ? "Saving..."
-                  : "Mark as Complete ✓"}
-              </button>
-            )}
 
-            {message && (
-              <p
-                style={{
-                  marginTop: "18px",
-                  color:
-                    message.includes(
-                      "complete"
-                    )
-                      ? "#22c55e"
-                      : "#ff7777",
-                }}
-              >
-                {message}
-              </p>
-            )}
+            </div>
           </div>
-        </div>
+        </article>
+
       </div>
     </main>
   );

@@ -54,7 +54,8 @@ export default function Navbar() {
     }
 
     async function loadUser() {
-      const token = localStorage.getItem("lms_token");
+      const token =
+        localStorage.getItem("lms_token");
 
       if (!token) {
         setRole("");
@@ -91,17 +92,23 @@ export default function Navbar() {
           return;
         }
 
-        const user: User = await response.json();
+        const user: User =
+          await response.json();
 
-        console.log("NAVBAR USER:", user);
+        console.log(
+          "NAVBAR USER:",
+          user
+        );
+
         console.log(
           "NAVBAR ROLE:",
           user?.role?.name
         );
 
-        const actualRole = normalizeRole(
-          user?.role?.name || ""
-        );
+        const actualRole =
+          normalizeRole(
+            user?.role?.name || ""
+          );
 
         if (actualRole) {
           localStorage.setItem(
@@ -148,9 +155,17 @@ export default function Navbar() {
   }, []);
 
   function handleLogout() {
-    localStorage.removeItem("lms_token");
-    localStorage.removeItem("lms_role");
-    localStorage.removeItem("lms_user");
+    localStorage.removeItem(
+      "lms_token"
+    );
+
+    localStorage.removeItem(
+      "lms_role"
+    );
+
+    localStorage.removeItem(
+      "lms_user"
+    );
 
     setRole("");
 
@@ -163,38 +178,37 @@ export default function Navbar() {
 
   if (!checking && !role) {
     return (
-      <nav style={navStyle}>
-        <Link href="/" style={logoStyle}>
-          LMS
-        </Link>
+      <NavbarShell>
+        <NavbarLogo href="/" />
 
-        <div style={navLinksStyle}>
-          <Link href="/" style={linkStyle}>
-            Home
-          </Link>
+        <NavbarLinks>
+          <NavLink
+            href="/"
+            label="Home"
+          />
 
-          <Link
+          <NavLink
             href="/courses"
-            style={linkStyle}
-          >
-            Courses
-          </Link>
+            label="Courses"
+          />
+        </NavbarLinks>
 
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Link
             href="/login"
-            style={linkStyle}
+            className="rounded-lg px-3 py-2 text-xs font-medium text-gray-400 transition hover:text-white sm:px-4 sm:text-sm"
           >
             Login
           </Link>
 
           <Link
             href="/register"
-            style={linkStyle}
+            className="rounded-lg bg-[#f15a24] px-3.5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-[#f15a24]/10 transition hover:bg-[#d94b1f] sm:px-4 sm:text-sm"
           >
             Register
           </Link>
         </div>
-      </nav>
+      </NavbarShell>
     );
   }
 
@@ -204,24 +218,23 @@ export default function Navbar() {
 
   if (checking && !role) {
     return (
-      <nav style={navStyle}>
-        <Link href="/" style={logoStyle}>
-          LMS
-        </Link>
+      <NavbarShell>
+        <NavbarLogo href="/" />
 
-        <div style={navLinksStyle}>
-          <Link href="/" style={linkStyle}>
-            Home
-          </Link>
+        <NavbarLinks>
+          <NavLink
+            href="/"
+            label="Home"
+          />
 
-          <Link
+          <NavLink
             href="/courses"
-            style={linkStyle}
-          >
-            Courses
-          </Link>
-        </div>
-      </nav>
+            label="Courses"
+          />
+        </NavbarLinks>
+
+        <div className="h-9 w-16 shrink-0 animate-pulse rounded-lg bg-white/[0.05]" />
+      </NavbarShell>
     );
   }
 
@@ -231,38 +244,25 @@ export default function Navbar() {
 
   if (role === "admin") {
     return (
-      <nav style={navStyle}>
-        <Link
-          href="/admin/dashboard"
-          style={logoStyle}
-        >
-          LMS
-        </Link>
+      <NavbarShell>
+        <NavbarLogo href="/admin/dashboard" />
 
-        <div style={navLinksStyle}>
-          <Link
+        <NavbarLinks>
+          <NavLink
             href="/admin/dashboard"
-            style={linkStyle}
-          >
-            Admin Dashboard
-          </Link>
+            label="Dashboard"
+          />
 
-          <Link
+          <NavLink
             href="/courses"
-            style={linkStyle}
-          >
-            Courses
-          </Link>
+            label="Courses"
+          />
+        </NavbarLinks>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={logoutStyle}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
+        <LogoutButton
+          onClick={handleLogout}
+        />
+      </NavbarShell>
     );
   }
 
@@ -272,38 +272,25 @@ export default function Navbar() {
 
   if (role === "content-manager") {
     return (
-      <nav style={navStyle}>
-        <Link
-          href="/admin/dashboard"
-          style={logoStyle}
-        >
-          LMS
-        </Link>
+      <NavbarShell>
+        <NavbarLogo href="/admin/dashboard" />
 
-        <div style={navLinksStyle}>
-          <Link
+        <NavbarLinks>
+          <NavLink
             href="/admin/dashboard"
-            style={linkStyle}
-          >
-            Dashboard
-          </Link>
+            label="Dashboard"
+          />
 
-          <Link
+          <NavLink
             href="/courses"
-            style={linkStyle}
-          >
-            Courses
-          </Link>
+            label="Courses"
+          />
+        </NavbarLinks>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={logoutStyle}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
+        <LogoutButton
+          onClick={handleLogout}
+        />
+      </NavbarShell>
     );
   }
 
@@ -313,42 +300,30 @@ export default function Navbar() {
 
   if (role === "student") {
     return (
-      <nav style={navStyle}>
-        <Link href="/" style={logoStyle}>
-          LMS
-        </Link>
+      <NavbarShell>
+        <NavbarLogo href="/" />
 
-        <div style={navLinksStyle}>
-          <Link
+        <NavbarLinks>
+          <NavLink
             href="/"
-            style={linkStyle}
-          >
-            Home
-          </Link>
+            label="Home"
+          />
 
-          <Link
+          <NavLink
             href="/courses"
-            style={linkStyle}
-          >
-            Courses
-          </Link>
+            label="Courses"
+          />
 
-          <Link
+          <NavLink
             href="/my-courses"
-            style={linkStyle}
-          >
-            My Courses
-          </Link>
+            label="My Courses"
+          />
+        </NavbarLinks>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={logoutStyle}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
+        <LogoutButton
+          onClick={handleLogout}
+        />
+      </NavbarShell>
     );
   }
 
@@ -358,45 +333,30 @@ export default function Navbar() {
 
   if (role === "instructor") {
     return (
-      <nav style={navStyle}>
-        <Link
-          href="/instructor/dashboard"
-          style={logoStyle}
-        >
-          LMS
-        </Link>
+      <NavbarShell>
+        <NavbarLogo href="/instructor/dashboard" />
 
-        <div style={navLinksStyle}>
-          <Link
+        <NavbarLinks>
+          <NavLink
             href="/instructor/dashboard"
-            style={linkStyle}
-          >
-            Dashboard
-          </Link>
+            label="Dashboard"
+          />
 
-          <Link
+          <NavLink
             href="/courses"
-            style={linkStyle}
-          >
-            Courses
-          </Link>
+            label="Courses"
+          />
 
-          <Link
+          <NavLink
             href="/instructor/dashboard/create-course"
-            style={linkStyle}
-          >
-            Create Course
-          </Link>
+            label="Create Course"
+          />
+        </NavbarLinks>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={logoutStyle}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
+        <LogoutButton
+          onClick={handleLogout}
+        />
+      </NavbarShell>
     );
   }
 
@@ -405,72 +365,126 @@ export default function Navbar() {
   // ==========================================
 
   return (
-    <nav style={navStyle}>
-      <Link href="/" style={logoStyle}>
-        LMS
-      </Link>
+    <NavbarShell>
+      <NavbarLogo href="/" />
 
-      <div style={navLinksStyle}>
-        <Link
+      <NavbarLinks>
+        <NavLink
           href="/"
-          style={linkStyle}
-        >
-          Home
-        </Link>
+          label="Home"
+        />
 
-        <Link
+        <NavLink
           href="/courses"
-          style={linkStyle}
-        >
-          Courses
-        </Link>
+          label="Courses"
+        />
+      </NavbarLinks>
 
-        <button
-          type="button"
-          onClick={handleLogout}
-          style={logoutStyle}
-        >
-          Logout
-        </button>
+      <LogoutButton
+        onClick={handleLogout}
+      />
+    </NavbarShell>
+  );
+}
+
+// ==========================================
+// NAVBAR SHELL
+// ==========================================
+
+function NavbarShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <nav className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#050505]/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-2 px-3 sm:h-[72px] sm:gap-4 sm:px-6 lg:px-10">
+        {children}
       </div>
     </nav>
   );
 }
 
-const navStyle = {
-  height: "64px",
-  borderBottom: "1px solid #292929",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  padding: "0 32px",
-  boxSizing: "border-box" as const,
-};
+// ==========================================
+// LOGO
+// ==========================================
 
-const logoStyle = {
-  color: "white",
-  textDecoration: "none",
-  fontSize: "20px",
-  fontWeight: "800",
-};
+function NavbarLogo({
+  href,
+}: {
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex shrink-0 items-center gap-2"
+    >
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f15a24] text-sm font-black text-white shadow-lg shadow-[#f15a24]/10 transition group-hover:bg-[#d94b1f] sm:h-9 sm:w-9">
+        L
+      </span>
 
-const navLinksStyle = {
-  display: "flex",
-  gap: "22px",
-  alignItems: "center",
-};
+      <span className="hidden text-lg font-bold tracking-tight text-white xs:block sm:block">
+        LMS
+      </span>
+    </Link>
+  );
+}
 
-const linkStyle = {
-  color: "white",
-  textDecoration: "none",
-  fontSize: "14px",
-};
+// ==========================================
+// NAV LINKS
+// ==========================================
 
-const logoutStyle = {
-  padding: "9px 14px",
-  borderRadius: "7px",
-  border: "1px solid #444",
-  background: "transparent",
-  color: "white",
-  cursor: "pointer",
-};
+function NavbarLinks({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-w-0 flex-1">
+      <div className="mx-auto flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-xl border border-white/[0.08] bg-white/[0.025] p-1 scrollbar-none">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// NAV LINK
+// ==========================================
+
+function NavLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="shrink-0 whitespace-nowrap rounded-lg px-2.5 py-2 text-xs font-medium text-gray-400 transition hover:bg-white/[0.06] hover:text-white sm:px-4 sm:text-sm"
+    >
+      {label}
+    </Link>
+  );
+}
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+function LogoutButton({
+  onClick,
+}: {
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="shrink-0 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 text-xs font-medium text-gray-300 transition hover:border-[#f15a24]/40 hover:bg-[#f15a24]/[0.06] hover:text-white sm:px-4 sm:py-2.5 sm:text-sm"
+    >
+      Logout
+    </button>
+  );
+}
