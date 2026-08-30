@@ -24,17 +24,17 @@ const deniedExecutableTypes = [
 
 const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin => ({
   'users-permissions': {
-  config: {
-    jwtManagement: 'refresh',
-    sessions: {
-      httpOnly: true,
-      cookie: {
-        secure: false,
-        sameSite: 'lax',
+    config: {
+      jwtManagement: 'legacy-support',
+      sessions: {
+        httpOnly: true,
+        cookie: {
+          secure: env.bool('AUTH_COOKIE_SECURE', process.env.NODE_ENV === 'production'),
+          sameSite: env('AUTH_COOKIE_SAMESITE', 'lax'),
+        },
       },
     },
   },
-},
   upload: {
     config: {
       security: {

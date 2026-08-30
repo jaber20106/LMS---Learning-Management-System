@@ -89,6 +89,9 @@ public/uploads/*
 # Node.js
 ############################
 
+.env.*
+!.env.example
+
 lib-cov
 lcov.info
 pids
