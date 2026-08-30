@@ -84,7 +84,7 @@ export default function LessonDetailsPage({
 
         const lessonResponse =
           await fetch(
-            `http://localhost:1337/api/lessons/${encodeURIComponent(
+            `https://lms-learning-management-system-syom.onrender.com/api/lessons/${encodeURIComponent(
               documentId
             )}`,
             {
@@ -145,7 +145,7 @@ export default function LessonDetailsPage({
 
         const userResponse =
           await fetch(
-            "http://localhost:1337/api/users/me",
+            "https://lms-learning-management-system-syom.onrender.com/api/users/me",
             {
               method: "GET",
               headers: {
@@ -196,7 +196,7 @@ export default function LessonDetailsPage({
 
         const progressResponse =
           await fetch(
-            "http://localhost:1337/api/lesson-progresses?populate=*",
+            "https://lms-learning-management-system-syom.onrender.com/api/lesson-progresses?populate=*",
             {
               method: "GET",
               headers: {
@@ -329,7 +329,7 @@ export default function LessonDetailsPage({
 
       const userResponse =
         await fetch(
-          "http://localhost:1337/api/users/me",
+          "https://lms-learning-management-system-syom.onrender.com/api/users/me",
           {
             method: "GET",
             headers: {
@@ -381,7 +381,7 @@ export default function LessonDetailsPage({
 
         const updateResponse =
           await fetch(
-            `http://localhost:1337/api/lesson-progresses/${encodeURIComponent(
+            `https://lms-learning-management-system-syom.onrender.com/api/lesson-progresses/${encodeURIComponent(
               progress.documentId
             )}`,
             {
@@ -439,7 +439,7 @@ export default function LessonDetailsPage({
 
       const createResponse =
         await fetch(
-          "http://localhost:1337/api/lesson-progresses",
+          "https://lms-learning-management-system-syom.onrender.com/api/lesson-progresses",
           {
             method: "POST",
             headers: {

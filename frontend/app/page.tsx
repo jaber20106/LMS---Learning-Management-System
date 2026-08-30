@@ -34,7 +34,7 @@ export default function HomePage() {
 
       try {
         const response = await fetch(
-          "http://localhost:1337/api/enrollments",
+          "https://lms-learning-management-system-syom.onrender.com/api/enrollments",
           {
             headers: {
               Authorization: `Bearer ${token}`,

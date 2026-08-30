@@ -37,7 +37,7 @@ export default function EnrollButton({
       try {
         // Check current user's enrollments
         const response = await fetch(
-          "http://localhost:1337/api/users/me?populate=enrollments.course",
+          "https://lms-learning-management-system-syom.onrender.com/api/users/me?populate=enrollments.course",
           {
             method: "GET",
             headers: {
@@ -103,7 +103,7 @@ export default function EnrollButton({
       setMessage("Enrolling...");
 
       const response = await fetch(
-        "http://localhost:1337/api/enrollments",
+        "https://lms-learning-management-system-syom.onrender.com/api/enrollments",
         {
           method: "POST",
           headers: {

@@ -38,7 +38,7 @@ type Quiz = {
   description?: string;
 };
 
-const API_URL = "http://localhost:1337";
+const API_URL = "https://lms-learning-management-system-syom.onrender.com";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);

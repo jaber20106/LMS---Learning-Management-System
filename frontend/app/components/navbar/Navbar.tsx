@@ -72,7 +72,7 @@ export default function Navbar() {
 
       try {
         const response = await fetch(
-          "http://localhost:1337/api/users/me?populate=role",
+          "https://lms-learning-management-system-syom.onrender.com/api/users/me?populate=role",
           {
             method: "GET",
             headers: {

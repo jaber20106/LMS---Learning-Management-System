@@ -76,7 +76,7 @@ export default function QuizPage() {
 
         const response =
           await fetch(
-            `http://localhost:1337/api/quizzes/${documentId}?populate[questions]=true`,
+            `https://lms-learning-management-system-syom.onrender.com/api/quizzes/${documentId}?populate[questions]=true`,
             {
               method: "GET",
               headers: {

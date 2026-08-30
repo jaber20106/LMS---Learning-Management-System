@@ -42,7 +42,7 @@ export default function EditCoursePage() {
 
       try {
         const response = await fetch(
-          `http://localhost:1337/api/courses/${documentId}`,
+          `https://lms-learning-management-system-syom.onrender.com/api/courses/${documentId}`,
           {
             method: "GET",
             headers: {
@@ -120,7 +120,7 @@ export default function EditCoursePage() {
 
     try {
       const response = await fetch(
-        `http://localhost:1337/api/courses/${documentId}`,
+        `https://lms-learning-management-system-syom.onrender.com/api/courses/${documentId}`,
         {
           method: "PUT",
           headers: {

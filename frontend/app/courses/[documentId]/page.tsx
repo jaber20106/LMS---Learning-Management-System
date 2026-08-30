@@ -107,10 +107,10 @@ export default function CourseDetailsPage({
 
         const courseUrl =
           currentRole === "instructor"
-            ? `http://localhost:1337/api/courses/${encodeURIComponent(
+            ? `https://lms-learning-management-system-syom.onrender.com/api/courses/${encodeURIComponent(
                 documentId
               )}?status=draft&populate=lessons`
-            : `http://localhost:1337/api/courses/${encodeURIComponent(
+            : `https://lms-learning-management-system-syom.onrender.com/api/courses/${encodeURIComponent(
                 documentId
               )}?populate=lessons`;
 
@@ -227,7 +227,7 @@ export default function CourseDetailsPage({
 
         const userResponse =
           await fetch(
-            "http://localhost:1337/api/users/me?populate=enrollments.course",
+            "https://lms-learning-management-system-syom.onrender.com/api/users/me?populate=enrollments.course",
             {
               method: "GET",
               headers: {
@@ -304,7 +304,7 @@ export default function CourseDetailsPage({
 
         const progressResponse =
           await fetch(
-            "http://localhost:1337/api/lesson-progresses?populate=*",
+            "https://lms-learning-management-system-syom.onrender.com/api/lesson-progresses?populate=*",
             {
               method: "GET",
               headers: {

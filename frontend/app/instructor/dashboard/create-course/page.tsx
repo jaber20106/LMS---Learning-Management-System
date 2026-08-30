@@ -49,7 +49,7 @@ export default function CreateCoursePage() {
 
     try {
       const response = await fetch(
-        "http://localhost:1337/api/courses",
+        "https://lms-learning-management-system-syom.onrender.com/api/courses",
         {
           method: "POST",
           headers: {
