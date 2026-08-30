@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Lesson = {
   id: number;
@@ -248,25 +247,18 @@ export default function LessonDetailsPage({
         // ======================================
 
         const currentProgress =
-          progressList.find(
-            (item) => {
-              const progressUserId =
-                item?.user?.id ||
-                item?.user?.data?.id;
+          progressList.find((item) => {
+            const progressUserId =
+              item?.user?.id;
 
-              const progressLessonId =
-                item?.lesson?.documentId ||
-                item?.lesson?.data
-                  ?.documentId;
+            const progressLessonId =
+              item?.lesson?.documentId;
 
-              return (
-                progressUserId ===
-                  currentUserId &&
-                progressLessonId ===
-                  documentId
-              );
-            }
-          ) || null;
+            return (
+              progressUserId === currentUserId &&
+              progressLessonId === documentId
+            );
+        }) || null;
 
         console.log(
           "CURRENT LESSON PROGRESS:",
