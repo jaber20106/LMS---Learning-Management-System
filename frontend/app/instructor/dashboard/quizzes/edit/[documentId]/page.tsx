@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Question = {
   id: number;
@@ -56,7 +56,7 @@ export default function EditQuizPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:1337/api/quizzes/${documentId}?populate[questions]=true`,
+        `https://lms-learning-management-system-production-0ff5.up.railway.app/api/quizzes/${documentId}?populate[questions]=true`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -162,7 +162,7 @@ export default function EditQuizPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:1337/api/quiz-questions/${question.documentId}`,
+        `https://lms-learning-management-system-production-0ff5.up.railway.app/api/quiz-questions/${question.documentId}`,
         {
           method: "DELETE",
           headers: {
@@ -270,7 +270,7 @@ export default function EditQuizPage() {
       // =========================
 
       const quizResponse = await fetch(
-        `http://localhost:1337/api/quizzes/${documentId}`,
+        `https://lms-learning-management-system-production-0ff5.up.railway.app/api/quizzes/${documentId}`,
         {
           method: "PUT",
           headers: {
@@ -321,7 +321,7 @@ export default function EditQuizPage() {
         // Existing question
         if (question.documentId) {
           const response = await fetch(
-            `http://localhost:1337/api/quiz-questions/${question.documentId}`,
+            `https://lms-learning-management-system-production-0ff5.up.railway.app/api/quiz-questions/${question.documentId}`,
             {
               method: "PUT",
               headers: {
@@ -351,7 +351,7 @@ export default function EditQuizPage() {
         } else {
           // New question
           const response = await fetch(
-            "http://localhost:1337/api/quiz-questions",
+            "https://lms-learning-management-system-production-0ff5.up.railway.app/api/quiz-questions",
             {
               method: "POST",
               headers: {

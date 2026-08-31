@@ -1,8 +1,8 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 
 export default function CreateCoursePage() {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function CreateCoursePage() {
 
     try {
       const response = await fetch(
-        "http://localhost:1337/api/courses",
+        "https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses",
         {
           method: "POST",
           headers: {

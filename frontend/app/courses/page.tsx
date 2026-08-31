@@ -13,7 +13,7 @@ type CoursesResponse = {
 
 async function getCourses(): Promise<Course[]> {
   const response = await fetch(
-    "http://localhost:1337/api/courses",
+    "https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses",
     {
       cache: "no-store",
     }

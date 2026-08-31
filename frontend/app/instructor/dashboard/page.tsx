@@ -60,7 +60,7 @@ export default function InstructorDashboard() {
     try {
       const userResponse =
         await fetch(
-          "http://localhost:1337/api/users/me?populate=*",
+          "https://lms-learning-management-system-production-0ff5.up.railway.app/api/users/me?populate=*",
           {
             method: "GET",
             headers: {
@@ -88,7 +88,7 @@ export default function InstructorDashboard() {
 
       const courseResponse =
         await fetch(
-          "http://localhost:1337/api/courses?populate=lessons",
+          "https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses?populate=lessons",
           {
             method: "GET",
             headers: {
@@ -172,7 +172,7 @@ export default function InstructorDashboard() {
     try {
       const response =
         await fetch(
-          `http://localhost:1337/api/courses/${documentId}`,
+          `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses/${documentId}`,
           {
             method: "DELETE",
             headers: {

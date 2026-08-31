@@ -76,7 +76,7 @@ export default function QuizPage() {
 
         const response =
           await fetch(
-            `http://localhost:1337/api/quizzes/${documentId}?populate[questions]=true`,
+            `https://lms-learning-management-system-production-0ff5.up.railway.app/api/quizzes/${documentId}?populate[questions]=true`,
             {
               method: "GET",
               headers: {

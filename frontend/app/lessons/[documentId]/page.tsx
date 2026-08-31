@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Lesson = {
   id: number;
@@ -16,13 +15,23 @@ type Progress = {
   documentId: string;
   completed: boolean;
   completedAt?: string | null;
+
   lesson?: {
     id?: number;
     documentId?: string;
+    data?: {
+      id?: number;
+      documentId?: string;
+    } | null;
   } | null;
+
   user?: {
     id?: number;
     documentId?: string;
+    data?: {
+      id?: number;
+      documentId?: string;
+    } | null;
   } | null;
 };
 
@@ -85,7 +94,7 @@ export default function LessonDetailsPage({
 
         const lessonResponse =
           await fetch(
-            `http://localhost:1337/api/lessons/${encodeURIComponent(
+            `https://lms-learning-management-system-production-0ff5.up.railway.app/api/lessons/${encodeURIComponent(
               documentId
             )}`,
             {
@@ -146,7 +155,7 @@ export default function LessonDetailsPage({
 
         const userResponse =
           await fetch(
-            "http://localhost:1337/api/users/me",
+            "https://lms-learning-management-system-production-0ff5.up.railway.app/api/users/me",
             {
               method: "GET",
               headers: {
@@ -197,7 +206,7 @@ export default function LessonDetailsPage({
 
         const progressResponse =
           await fetch(
-            "http://localhost:1337/api/lesson-progresses?populate=*",
+            "https://lms-learning-management-system-production-0ff5.up.railway.app/api/lesson-progresses?populate=*",
             {
               method: "GET",
               headers: {
@@ -337,7 +346,7 @@ export default function LessonDetailsPage({
 
       const userResponse =
         await fetch(
-          "http://localhost:1337/api/users/me",
+          "https://lms-learning-management-system-production-0ff5.up.railway.app/api/users/me",
           {
             method: "GET",
             headers: {
@@ -389,7 +398,7 @@ export default function LessonDetailsPage({
 
         const updateResponse =
           await fetch(
-            `http://localhost:1337/api/lesson-progresses/${encodeURIComponent(
+            `https://lms-learning-management-system-production-0ff5.up.railway.app/api/lesson-progresses/${encodeURIComponent(
               progress.documentId
             )}`,
             {
@@ -447,7 +456,7 @@ export default function LessonDetailsPage({
 
       const createResponse =
         await fetch(
-          "http://localhost:1337/api/lesson-progresses",
+          "https://lms-learning-management-system-production-0ff5.up.railway.app/api/lesson-progresses",
           {
             method: "POST",
             headers: {

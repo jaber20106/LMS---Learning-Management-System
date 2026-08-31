@@ -1,8 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
 
 type Course = {
   id: number;
@@ -42,7 +42,7 @@ export default function EditCoursePage() {
 
       try {
         const response = await fetch(
-          `http://localhost:1337/api/courses/${documentId}`,
+          `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses/${documentId}`,
           {
             method: "GET",
             headers: {
@@ -120,7 +120,7 @@ export default function EditCoursePage() {
 
     try {
       const response = await fetch(
-        `http://localhost:1337/api/courses/${documentId}`,
+        `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses/${documentId}`,
         {
           method: "PUT",
           headers: {

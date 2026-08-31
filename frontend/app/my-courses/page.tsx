@@ -78,7 +78,7 @@ export default function MyCoursesPage() {
 
       try {
         const response = await fetch(
-          "http://localhost:1337/api/users/me?populate[enrollments][populate][course][populate][0]=lessons&populate[enrollments][populate][course][populate][1]=quizzes",
+          "https://lms-learning-management-system-production-0ff5.up.railway.app/api/users/me?populate[enrollments][populate][course][populate][0]=lessons&populate[enrollments][populate][course][populate][1]=quizzes",
           {
             method: "GET",
             headers: {

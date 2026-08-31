@@ -29,7 +29,7 @@ export default function LoginPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:1337/api/auth/local",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/local`,
         {
           method: "POST",
           headers: {
@@ -82,7 +82,7 @@ export default function LoginPage() {
       try {
         const userResponse =
           await fetch(
-            "http://localhost:1337/api/users/me?populate=role",
+            `${process.env.NEXT_PUBLIC_API_URL}/api/users/me?populate=role`,
             {
               headers: {
                 Authorization:

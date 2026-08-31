@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import EnrollButton from "@/app/components/EnrollButton";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Lesson = {
   id: number;
@@ -107,10 +107,10 @@ export default function CourseDetailsPage({
 
         const courseUrl =
           currentRole === "instructor"
-            ? `http://localhost:1337/api/courses/${encodeURIComponent(
+            ? `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses/${encodeURIComponent(
                 documentId
               )}?status=draft&populate=lessons`
-            : `http://localhost:1337/api/courses/${encodeURIComponent(
+            : `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses/${encodeURIComponent(
                 documentId
               )}?populate=lessons`;
 
@@ -227,7 +227,7 @@ export default function CourseDetailsPage({
 
         const userResponse =
           await fetch(
-            "http://localhost:1337/api/users/me?populate=enrollments.course",
+            "https://lms-learning-management-system-production-0ff5.up.railway.app/api/users/me?populate=enrollments.course",
             {
               method: "GET",
               headers: {
@@ -304,7 +304,7 @@ export default function CourseDetailsPage({
 
         const progressResponse =
           await fetch(
-            "http://localhost:1337/api/lesson-progresses?populate=*",
+            "https://lms-learning-management-system-production-0ff5.up.railway.app/api/lesson-progresses?populate=*",
             {
               method: "GET",
               headers: {

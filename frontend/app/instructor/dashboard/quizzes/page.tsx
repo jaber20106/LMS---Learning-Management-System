@@ -75,7 +75,7 @@ export default function CreateQuizPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:1337/api/courses?status=draft&populate=lessons",
+        "https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses?status=draft&populate=lessons",
         {
           method: "GET",
           headers: {
@@ -233,7 +233,7 @@ export default function CreateQuizPage() {
       // =========================
 
       const quizResponse = await fetch(
-        "http://localhost:1337/api/quizzes",
+        "https://lms-learning-management-system-production-0ff5.up.railway.app/api/quizzes",
         {
           method: "POST",
           headers: {
@@ -292,7 +292,7 @@ export default function CreateQuizPage() {
 
         const questionResponse =
           await fetch(
-            "http://localhost:1337/api/quiz-questions",
+            "https://lms-learning-management-system-production-0ff5.up.railway.app/api/quiz-questions",
             {
               method: "POST",
               headers: {

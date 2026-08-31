@@ -34,7 +34,7 @@ export default function HomePage() {
 
       try {
         const response = await fetch(
-          "http://localhost:1337/api/enrollments",
+          "https://lms-learning-management-system-production-0ff5.up.railway.app/api/enrollments",
           {
             headers: {
               Authorization: `Bearer ${token}`,

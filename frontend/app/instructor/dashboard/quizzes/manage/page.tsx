@@ -49,7 +49,7 @@ export default function ManageQuizzesPage() {
       // ==========================================
 
       const userResponse = await fetch(
-        "http://localhost:1337/api/users/me",
+        "https://lms-learning-management-system-production-0ff5.up.railway.app/api/users/me",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ export default function ManageQuizzesPage() {
       // ==========================================
 
       const coursesUrl =
-        `http://localhost:1337/api/courses` +
+        `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses` +
         `?filters[instructor][id][$eq]=${userId}` +
         `&status=published`;
 
@@ -131,7 +131,7 @@ export default function ManageQuizzesPage() {
         );
 
         const quizUrl =
-          `http://localhost:1337/api/quizzes` +
+          `https://lms-learning-management-system-production-0ff5.up.railway.app/api/quizzes` +
           `?filters[course][documentId][$eq]=${course.documentId}` +
           `&status=published` +
           `&populate[questions]=true`;
@@ -244,7 +244,7 @@ export default function ManageQuizzesPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:1337/api/quizzes/${documentId}`,
+        `https://lms-learning-management-system-production-0ff5.up.railway.app/api/quizzes/${documentId}`,
         {
           method: "DELETE",
           headers: {

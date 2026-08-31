@@ -72,7 +72,7 @@ export default function Navbar() {
 
       try {
         const response = await fetch(
-          "http://localhost:1337/api/users/me?populate=role",
+          "https://lms-learning-management-system-production-0ff5.up.railway.app/api/users/me?populate=role",
           {
             method: "GET",
             headers: {

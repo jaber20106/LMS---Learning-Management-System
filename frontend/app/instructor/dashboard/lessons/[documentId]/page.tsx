@@ -81,7 +81,7 @@ export default function ManageLessonsPage({
 }
 
         const response = await fetch(
-          `http://localhost:1337/api/courses/${encodeURIComponent(
+          `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses/${encodeURIComponent(
             documentId
           )}?status=draft&populate=lessons`,
           {
@@ -204,7 +204,7 @@ export default function ManageLessonsPage({
 
       if (editingLesson) {
         const response = await fetch(
-          `http://localhost:1337/api/lessons/${encodeURIComponent(
+          `https://lms-learning-management-system-production-0ff5.up.railway.app/api/lessons/${encodeURIComponent(
             editingLesson.documentId
           )}`,
           {
@@ -257,7 +257,7 @@ export default function ManageLessonsPage({
       // =========================
 
       const response = await fetch(
-        "http://localhost:1337/api/lessons",
+        "https://lms-learning-management-system-production-0ff5.up.railway.app/api/lessons",
         {
           method: "POST",
           headers: {
@@ -333,7 +333,7 @@ export default function ManageLessonsPage({
     try {
       const response =
         await fetch(
-          `http://localhost:1337/api/courses/${encodeURIComponent(
+          `https://lms-learning-management-system-production-0ff5.up.railway.app/api/courses/${encodeURIComponent(
             courseDocumentId
           )}?status=draft&populate=lessons`,
           {
@@ -396,7 +396,7 @@ export default function ManageLessonsPage({
     try {
       const response =
         await fetch(
-          `http://localhost:1337/api/lessons/${encodeURIComponent(
+          `https://lms-learning-management-system-production-0ff5.up.railway.app/api/lessons/${encodeURIComponent(
             lesson.documentId
           )}`,
           {
