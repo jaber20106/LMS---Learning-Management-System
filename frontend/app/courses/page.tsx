@@ -20,7 +20,7 @@ async function getCourses(): Promise<Course[]> {
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch courses");
+    return [];
   }
 
   const result: CoursesResponse =
