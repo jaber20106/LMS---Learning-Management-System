@@ -7,7 +7,9 @@ const config = (
 
   port: env.int('PORT', 1337),
 
-  proxy: true,
+  proxy: {
+    koa: true,
+  },
 
   app: {
     keys: env.array('APP_KEYS')!,
