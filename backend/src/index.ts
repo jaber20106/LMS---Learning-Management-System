@@ -1,20 +1,52 @@
-// import type { Core } from '@strapi/strapi';
-
 export default {
-  /**
-   * An asynchronous register function that runs before
-   * your application is initialized.
-   *
-   * This gives you an opportunity to extend code.
-   */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register() {},
 
-  /**
-   * An asynchronous bootstrap function that runs before
-   * your application gets started.
-   *
-   * This gives you an opportunity to set up your data model,
-   * run jobs, or perform some special logic.
-   */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
+  async bootstrap({ strapi }: any) {
+    strapi.db.lifecycles.subscribe({
+      models: ["plugin::users-permissions.user"],
+
+      async afterCreate(event: any) {
+        const user = event.result;
+
+        if (!user?.id) {
+          return;
+        }
+
+        try {
+          const studentRole = await strapi.db
+            .query("plugin::users-permissions.role")
+            .findOne({
+              where: {
+                name: "Student",
+              },
+            });
+
+          if (!studentRole) {
+            strapi.log.error("Student role not found.");
+            return;
+          }
+
+          await strapi.db
+            .query("plugin::users-permissions.user")
+            .update({
+              where: {
+                id: user.id,
+              },
+              data: {
+                role: studentRole.id,
+              },
+            });
+
+          strapi.log.info(
+            `New user ${user.id} assigned to Student role.`
+          );
+        } catch (error) {
+          strapi.log.error(
+            "Failed to assign Student role:",
+            error
+          );
+        }
+      },
+    });
+  },
 };
