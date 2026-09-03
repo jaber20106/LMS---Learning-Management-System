@@ -205,10 +205,15 @@ This Learning Management System allows students to learn through structured cour
                     │       Database       │
                     │       Railway        │
                     └──────────────────────┘
-Authentication Flow
+```
+
+---
+
+## Authentication Flow
 
 The application uses Strapi authentication with JWT.
 
+```text
 User
   │
   ▼
@@ -229,25 +234,32 @@ Current User + Role
   ├──────────────┬──────────────┐
   ▼              ▼              ▼
 Admin        Instructor      Student
+```
 
 Protected API requests use the authenticated user's JWT token:
 
+```text
 Authorization: Bearer <JWT>
-Learning Progress
+```
+
+---
+
+## Learning Progress
 
 Students can track their learning progress throughout a course.
 
 The progress system includes:
 
-Lesson completion
-Persistent lesson progress
-Course progress calculation
-Student-specific progress
-Instructor access to student progress
-Admin access to progress information
+- Lesson completion
+- Persistent lesson progress
+- Course progress calculation
+- Student-specific progress
+- Instructor access to student progress
+- Admin access to progress information
 
 Example:
 
+```text
 Course
  ├── Lesson 1 ✓
  ├── Lesson 2 ✓
@@ -255,56 +267,79 @@ Course
  └── Lesson 4
 
 Progress: 50%
+```
 
 Progress data is stored in the backend so that it remains available after logging out and logging back in.
 
-Quiz System
+---
+
+## Quiz System
 
 The LMS includes a quiz system for testing student knowledge.
 
-Instructor
+### Instructor
 
 Instructors can:
 
-Create quizzes
-Add quiz questions
-Create multiple-choice questions
-Manage quiz content
-Student
+- Create quizzes
+- Add quiz questions
+- Create multiple-choice questions
+- Manage quiz content
+
+### Student
 
 Students can:
 
-Open quizzes
-Answer quiz questions
-Submit quizzes
-Receive quiz results
-View their score
+- Open quizzes
+- Answer quiz questions
+- Submit quizzes
+- Receive quiz results
+- View their score
 
 Quiz data and results are managed through the Strapi backend.
 
-Application Routes
-Public Routes
-Route	Description
-/	Home page
-/courses	Browse available courses
-/login	User login
-/register	User registration
-Student Routes
-Route	Description
-/my-courses	View enrolled courses
-/lessons/[documentId]	View lesson
-/quizzes/[documentId]	Take quiz
-Instructor Routes
-Route	Description
-/instructor/dashboard	Instructor dashboard
-/instructor/dashboard/create-course	Create course
-/instructor/dashboard/edit/[documentId]	Edit course
-/instructor/dashboard/lessons/[documentId]	Manage lessons
-/instructor/dashboard/quizzes	Manage quizzes
-Admin Routes
-Route	Description
-/admin/dashboard	Admin dashboard
-Project Structure
+---
+
+## Application Routes
+
+### Public Routes
+
+| Route | Description |
+|---|---|
+| `/` | Home page |
+| `/courses` | Browse available courses |
+| `/login` | User login |
+| `/register` | User registration |
+
+### Student Routes
+
+| Route | Description |
+|---|---|
+| `/my-courses` | View enrolled courses |
+| `/lessons/[documentId]` | View lesson |
+| `/quizzes/[documentId]` | Take quiz |
+
+### Instructor Routes
+
+| Route | Description |
+|---|---|
+| `/instructor/dashboard` | Instructor dashboard |
+| `/instructor/dashboard/create-course` | Create course |
+| `/instructor/dashboard/edit/[documentId]` | Edit course |
+| `/instructor/dashboard/lessons/[documentId]` | Manage lessons |
+| `/instructor/dashboard/quizzes` | Manage quizzes |
+
+### Admin Routes
+
+| Route | Description |
+|---|---|
+| `/admin/dashboard` | Admin dashboard |
+
+---
+
+## Project Structure
+
+```text
 LMS---Learning-Management-System/
 │
 ├── backend/
@@ -337,93 +372,144 @@ LMS---Learning-Management-System/
 │   └── tsconfig.json
 │
 └── README.md
-Getting Started
-Prerequisites
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
 
 Make sure you have the following installed:
 
-Node.js
-npm
-PostgreSQL
-Git
-Clone the Repository
+- Node.js
+- npm
+- PostgreSQL
+- Git
+
+---
+
+### Clone the Repository
+
+```bash
 git clone https://github.com/jaber20106/LMS---Learning-Management-System.git
+```
+
+```bash
 cd LMS---Learning-Management-System
-Frontend Setup
+```
+
+---
+
+## Frontend Setup
 
 Navigate to the frontend directory:
 
+```bash
 cd frontend
+```
 
 Install dependencies:
 
+```bash
 npm install
+```
 
-Create a .env.local file:
+Create a `.env.local` file:
 
+```env
 NEXT_PUBLIC_API_URL=http://localhost:1337
+```
 
 Start the development server:
 
+```bash
 npm run dev
+```
 
 Frontend will run on:
 
+```text
 http://localhost:3000
-Backend Setup
+```
+
+---
+
+## Backend Setup
 
 Open another terminal and navigate to the backend:
 
+```bash
 cd backend
+```
 
 Install dependencies:
 
+```bash
 npm install
+```
 
 Configure the environment variables using:
 
+```text
 .env.example
+```
 
 Start Strapi:
 
+```bash
 npm run develop
+```
 
 Strapi admin panel:
 
+```text
 http://localhost:1337/admin
-Environment Variables
-Frontend
+```
+
+---
+
+## Environment Variables
+
+### Frontend
 
 Create:
 
+```text
 frontend/.env.local
+```
 
 Example:
 
+```env
 NEXT_PUBLIC_API_URL=http://localhost:1337
+```
 
 For production, use the deployed Strapi backend URL.
 
-Backend
+### Backend
 
 The backend requires environment variables for:
 
-Database connection
-PostgreSQL
-Strapi application keys
-JWT configuration
-Production configuration
+- Database connection
+- PostgreSQL
+- Strapi application keys
+- JWT configuration
+- Production configuration
 
-Use the provided .env.example file as the configuration reference.
+Use the provided `.env.example` file as the configuration reference.
 
-Never commit sensitive credentials, passwords, or secret keys to GitHub.
+> Never commit sensitive credentials, passwords, or secret keys to GitHub.
 
-API
+---
+
+## API
 
 The frontend communicates with the Strapi backend through REST APIs.
 
 Main API areas include:
 
+```text
 /api/auth/local
 /api/users/me
 /api/courses
@@ -432,93 +518,119 @@ Main API areas include:
 /api/lesson-progresses
 /api/quizzes
 /api/quiz-questions
+```
 
 API access is controlled through Strapi Users & Permissions and role-based authorization.
 
-Security
+---
+
+## Security
 
 The application implements security at both frontend and backend levels.
 
-Frontend
-Protected routes
-Authentication state
-Role-based navigation
-JWT authentication
-Backend
-Strapi authentication
-Role-based permissions
-Protected API endpoints
-Instructor ownership checks
-Protected user data
+### Frontend
+
+- Protected routes
+- Authentication state
+- Role-based navigation
+- JWT authentication
+
+### Backend
+
+- Strapi authentication
+- Role-based permissions
+- Protected API endpoints
+- Instructor ownership checks
+- Protected user data
 
 Backend authorization is used to ensure users cannot access functionality outside their assigned role.
 
-Deployment
-Frontend
+---
+
+## Deployment
+
+### Frontend
 
 The Next.js frontend is deployed on Vercel.
 
-Production URL:
+**Production URL:**
 
 https://lms-learning-management-system-eight.vercel.app/
 
-Backend
+### Backend
 
 The Strapi backend is deployed on Railway.
 
-Production URL:
+**Production URL:**
 
 https://lms-learning-management-system-production-0ff5.up.railway.app/
 
-Database
+### Database
 
 The production PostgreSQL database is hosted on Railway.
 
-Live Links
-Service	Link
-Live Website	https://lms-learning-management-system-eight.vercel.app/
-Strapi Admin	https://lms-learning-management-system-production-0ff5.up.railway.app/admin
-GitHub	https://github.com/jaber20106/LMS---Learning-Management-System
-Project Goals
+---
+
+## Live Links
+
+| Service | Link |
+|---|---|
+| Live Website | https://lms-learning-management-system-eight.vercel.app/ |
+| Strapi Admin | https://lms-learning-management-system-production-0ff5.up.railway.app/admin |
+| GitHub | https://github.com/jaber20106/LMS---Learning-Management-System |
+
+---
+
+## Project Goals
 
 The main goals of this project are:
 
-Build a full-stack Learning Management System
-Implement role-based access control
-Practice Next.js development
-Integrate Next.js with Strapi
-Work with PostgreSQL
-Implement authentication and authorization
-Implement course enrollment
-Implement lesson progress tracking
-Implement quiz functionality
-Deploy a full-stack application
-Future Improvements
+- Build a full-stack Learning Management System
+- Implement role-based access control
+- Practice Next.js development
+- Integrate Next.js with Strapi
+- Work with PostgreSQL
+- Implement authentication and authorization
+- Implement course enrollment
+- Implement lesson progress tracking
+- Implement quiz functionality
+- Deploy a full-stack application
+
+---
+
+## Future Improvements
 
 Possible future improvements include:
 
-Course search and filtering
-Course categories
-Advanced instructor analytics
-Improved admin statistics
-Advanced quiz functionality
-Certificate generation
-Course completion certificates
-Notification system
-Detailed student analytics
-UI and performance improvements
-Repository
+- Course search and filtering
+- Course categories
+- Advanced instructor analytics
+- Improved admin statistics
+- Advanced quiz functionality
+- Certificate generation
+- Course completion certificates
+- Notification system
+- Detailed student analytics
+- UI and performance improvements
+
+---
+
+## Repository
 
 GitHub Repository:
 
 https://github.com/jaber20106/LMS---Learning-Management-System
 
-Author
+---
 
-Jaber
+## Author
+
+**Jaber**
 
 Learning Management System developed as a full-stack educational project.
 
-License
+---
+
+## License
 
 This project was developed for educational and project demonstration purposes.
