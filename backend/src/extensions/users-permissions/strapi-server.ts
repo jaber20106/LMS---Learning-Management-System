@@ -27,10 +27,7 @@ export default (plugin: any) => {
         };
       }
     } catch (error) {
-      strapi.log.error(
-        "Could not load user role:",
-        error
-      );
+      strapi.log.error("Could not load user role:", error);
     }
   };
 
@@ -38,22 +35,20 @@ export default (plugin: any) => {
   // Override Register
   // New users -> Student
   // =========================
-  const originalRegister =
-    plugin.controllers.auth.register;
+  const originalRegister = plugin.controllers.auth.register;
 
   plugin.controllers.auth.register = async (ctx: any) => {
     await originalRegister(ctx);
 
     try {
-      const registeredUser = ctx.body?.user;
+      const userId = ctx.body?.user?.id;
 
-      if (!registeredUser?.id) {
+      if (!userId) {
+        strapi.log.error("Registered user ID not found.");
         return;
       }
 
-      // Find Student role
-      const studentRole = await strapi
-        .db
+      const studentRole = await strapi.db
         .query("plugin::users-permissions.role")
         .findOne({
           where: {
@@ -62,19 +57,15 @@ export default (plugin: any) => {
         });
 
       if (!studentRole) {
-        strapi.log.error(
-          'Student role not found. New user remains Authenticated.'
-        );
+        strapi.log.error("Student role not found.");
         return;
       }
 
-      // Change newly registered user's role to Student
-      await strapi
-        .db
+      await strapi.db
         .query("plugin::users-permissions.user")
         .update({
           where: {
-            id: registeredUser.id,
+            id: userId,
           },
           data: {
             role: studentRole.id,
@@ -82,7 +73,7 @@ export default (plugin: any) => {
         });
 
       strapi.log.info(
-        `New user ${registeredUser.id} assigned to Student role.`
+        `User ${userId} successfully assigned to Student role.`
       );
     } catch (error) {
       strapi.log.error(
